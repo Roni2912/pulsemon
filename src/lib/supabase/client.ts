@@ -5,11 +5,11 @@
  * Used for: User interactions, real-time subscriptions, client-side queries
  */
 
-import { createBrowserSupabaseClient } from '@supabase/ssr'
+import { createBrowserClient } from '@supabase/ssr'
 import { Database } from '../../types/supabase'
 
 // Create a singleton client for browser usage
-let client: ReturnType<typeof createBrowserSupabaseClient<Database>> | undefined
+let client: ReturnType<typeof createBrowserClient<Database>> | undefined
 
 export function createClient() {
   // Return existing client if already created (singleton pattern)
@@ -18,7 +18,7 @@ export function createClient() {
   }
 
   // Create new browser client
-  client = createBrowserSupabaseClient<Database>(
+  client = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )

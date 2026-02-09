@@ -5,14 +5,14 @@
  * Used for: Server actions, API routes, server-side rendering with auth
  */
 
-import { createServerSupabaseClient } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Database } from '../../types/supabase'
 
-export async function createServerClient() {
+export async function createServerSupabaseClient() {
   const cookieStore = cookies()
 
-  return createServerSupabaseClient<Database>(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -48,7 +48,7 @@ export async function createServerClient() {
  * Returns null if user is not authenticated
  */
 export async function getUser() {
-  const supabase = await createServerClient()
+  const supabase = await createServerSupabaseClient()
   
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
@@ -70,7 +70,7 @@ export async function getUser() {
  * Returns null if user is not authenticated or profile doesn't exist
  */
 export async function getUserProfile() {
-  const supabase = await createServerClient()
+  const supabase = await createServerSupabaseClient()
   const user = await getUser()
   
   if (!user) {
@@ -123,5 +123,5 @@ export async function checkUserPermission(action: 'create_monitor' | 'create_sta
 }
 
 // Type exports
-export type ServerSupabaseClient = Awaited<ReturnType<typeof createServerClient>>
+export type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>
 export type { Database } from '../../types/supabase'

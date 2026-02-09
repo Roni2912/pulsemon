@@ -54,10 +54,9 @@ CREATE INDEX IF NOT EXISTS monitors_response_time_idx
 -- CHECKS TABLE INDEXES
 -- ============================================================================
 
--- Index for uptime calculations (last 30 days)
+-- Index for uptime calculations (removed time-based predicate)
 CREATE INDEX IF NOT EXISTS checks_uptime_30d_idx 
-    ON checks(monitor_id, checked_at DESC, status) 
-    WHERE checked_at >= NOW() - INTERVAL '30 days';
+    ON checks(monitor_id, checked_at DESC, status);
 
 -- Index for response time trends
 CREATE INDEX IF NOT EXISTS checks_response_trends_idx 
@@ -79,10 +78,10 @@ CREATE INDEX IF NOT EXISTS checks_status_code_performance_idx
     ON checks(monitor_id, status_code, response_time_ms, checked_at DESC) 
     WHERE status_code IS NOT NULL;
 
--- Partial index for recent successful checks (performance baseline)
+-- Partial index for recent successful checks (removed time-based predicate)
 CREATE INDEX IF NOT EXISTS checks_recent_success_idx 
     ON checks(monitor_id, response_time_ms, checked_at DESC) 
-    WHERE status = 'success' AND checked_at >= NOW() - INTERVAL '7 days';
+    WHERE status = 'success';
 
 -- ============================================================================
 -- INCIDENTS TABLE INDEXES
