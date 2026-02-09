@@ -1,7 +1,7 @@
 export const PLANS = {
   FREE: {
     name: "Free",
-    monitors: 3,
+    monitors: 5,
     checkInterval: 5, // minutes
     historyDays: 7,
     statusPages: 1,
@@ -88,5 +88,5 @@ export const UPTIME_PERIODS = {
   "90d": 90 * 24 * 60 * 60 * 1000,
 } as const;
 
-export const APP_NAME = "UptimeGuard";
+export const APP_NAME = "PulseMon";
 export const APP_DESCRIPTION = "Monitor your websites and APIs with real-time alerts";

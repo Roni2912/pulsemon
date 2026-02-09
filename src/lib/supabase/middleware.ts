@@ -138,7 +138,7 @@ export const routeConfig = {
   auth: [
     '/login',
     '/signup',
-    '/forgot-password',
+    '/reset-password',
   ],
   
   // Protected routes - require authentication
