@@ -13,33 +13,32 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, email }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      
+
       {/* Main content */}
       <div
         className={cn(
           "transition-all duration-300 ease-in-out",
-          "lg:pl-20",
+          "lg:pl-[var(--sidebar-collapsed-width)]",
           sidebarOpen && "lg:pl-64"
         )}
       >
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 lg:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white/80 backdrop-blur-lg px-4 lg:px-6">
           <div className="flex items-center space-x-4">
-            {/* Mobile menu button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden"
+              className="lg:hidden h-9 w-9"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-lg font-semibold">Dashboard</h1>
+            <h1 className="text-base font-semibold">Dashboard</h1>
           </div>
           <UserMenu email={email} />
         </header>

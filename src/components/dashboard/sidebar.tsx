@@ -38,7 +38,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
@@ -46,37 +46,37 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen bg-background border-r transition-all duration-300 ease-in-out overflow-hidden",
-          isOpen ? "w-64" : "w-0 lg:w-20"
+          "fixed top-0 left-0 z-50 h-screen gradient-sidebar border-r border-[hsl(var(--sidebar-border))] transition-all duration-300 ease-in-out overflow-hidden",
+          isOpen ? "w-64" : "w-0 lg:w-[var(--sidebar-collapsed-width)]"
         )}
       >
         <div className={cn(
           "flex flex-col h-full w-64 lg:w-auto",
-          !isOpen && "lg:w-20"
+          !isOpen && "lg:w-[var(--sidebar-collapsed-width)]"
         )}>
-          {/* Header - matches dashboard header height */}
+          {/* Header */}
           <div className={cn(
-            "flex items-center h-16 border-b",
+            "flex items-center h-16 border-b border-[hsl(var(--sidebar-border))] overflow-hidden",
             isOpen ? "justify-between px-4" : "justify-center"
           )}>
             {isOpen ? (
               <>
-                <Link href="/dashboard" className="flex items-center">
-                  <Image 
-                    src="/logo1.png" 
-                    alt="PulseMon" 
-                    width={180} 
-                    height={45}
-                    className="w-auto h-auto max-h-28"
+                <Link href="/dashboard" className="flex items-center overflow-hidden">
+                  <Image
+                    src="/logo1.png"
+                    alt="PulseMon"
+                    width={200}
+                    height={130}
+                    className="h-20 w-auto object-contain"
                   />
                 </Link>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={onToggle}
-                  className="hover:bg-transparent flex-shrink-0"
+                  className="text-[hsl(var(--sidebar-muted))] hover:text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-hover))] flex-shrink-0 h-8 w-8"
                 >
-                  <ChevronLeft className="h-6 w-6" />
+                  <ChevronLeft className="h-5 w-5" />
                 </Button>
               </>
             ) : (
@@ -84,9 +84,9 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 variant="ghost"
                 size="icon"
                 onClick={onToggle}
-                className="hover:bg-transparent hidden lg:flex w-full h-full rounded-none p-0"
+                className="text-[hsl(var(--sidebar-muted))] hover:text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-hover))] hidden lg:flex w-full h-full rounded-none p-0"
               >
-                <Menu className="h-10 w-10" />
+                <Menu className="h-5 w-5" />
               </Button>
             )}
           </div>
@@ -100,19 +100,19 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-sm",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      ? "bg-[hsl(var(--sidebar-active))] text-[hsl(var(--sidebar-active-foreground))] shadow-sm"
+                      : "text-[hsl(var(--sidebar-muted))] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-foreground))]",
                     !isOpen && "lg:justify-center lg:px-0"
                   )}
                   title={!isOpen ? item.name : undefined}
                 >
                   <item.icon className={cn(
-                    "h-5 w-5 flex-shrink-0",
-                    isActive && "text-primary-foreground"
+                    "h-[1.125rem] w-[1.125rem] flex-shrink-0",
+                    isActive && "text-[hsl(var(--sidebar-active-foreground))]"
                   )} />
-                  {isOpen && <span className="font-medium text-sm">{item.name}</span>}
+                  {isOpen && <span className="font-medium">{item.name}</span>}
                 </Link>
               );
             })}

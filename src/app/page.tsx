@@ -25,14 +25,14 @@ export default function Home() {
     <div className="min-h-screen brand-gradient">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <Image 
-              src="/logo1.png" 
-              alt="PulseMon" 
-              width={240} 
-              height={60}
-              className="w-auto h-auto max-h-28 sm:max-h-28 md:max-h-64"
+        <div className="container mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between overflow-hidden">
+          <Link href="/" className="flex items-center overflow-hidden">
+            <Image
+              src="/logo1.png"
+              alt="PulseMon"
+              width={240}
+              height={160}
+              className="h-14 sm:h-32 w-auto object-contain"
               priority
             />
           </Link>
@@ -236,13 +236,13 @@ export default function Home() {
       <footer className="border-t brand-bg">
         <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-            <div className="flex items-center">
-              <Image 
-                src="/logo1.png" 
-                alt="PulseMon" 
-                width={200} 
-                height={50}
-                className="w-auto h-auto max-h-24 sm:max-h-16 md:max-h-32"
+            <div className="flex items-center overflow-hidden">
+              <Image
+                src="/logo1.png"
+                alt="PulseMon"
+                width={200}
+                height={130}
+                className="h-12 sm:h-20 w-auto object-contain"
               />
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground text-center">
