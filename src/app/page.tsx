@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { 
   Activity, 
   Bell, 
@@ -16,17 +15,18 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen brand-gradient">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-28 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <Image 
-              src="/logo.png" 
-              alt="PulseMon Logo" 
-              width={160} 
-              height={160}
-              className="h-40 w-40"
+              src="/logo1.png" 
+              alt="PulseMon" 
+              width={200} 
+              height={50}
+              className="w-auto h-auto max-h-50"
+              priority
             />
           </Link>
           <nav className="hidden md:flex items-center space-x-6">
@@ -52,7 +52,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
+      <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
             Monitor Your Websites
@@ -90,8 +90,9 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="container mx-auto px-4 py-20 bg-muted/30">
-        <div className="text-center mb-16">
+      <section id="features" className="w-full brand-bg py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Everything You Need to Stay Online
           </h2>
@@ -103,9 +104,7 @@ export default function Home() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="rounded-lg bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
-                <Activity className="h-6 w-6 text-primary" />
-              </div>
+              <Activity className="h-8 w-8 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">Real-time Monitoring</h3>
               <p className="text-muted-foreground">
                 Check your websites every minute. Get instant notifications when something goes wrong.
@@ -115,9 +114,7 @@ export default function Home() {
 
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="rounded-lg bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
-                <Bell className="h-6 w-6 text-primary" />
-              </div>
+              <Bell className="h-8 w-8 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">Smart Alerts</h3>
               <p className="text-muted-foreground">
                 Email, SMS, Slack, and webhook notifications. Never miss a downtime incident.
@@ -127,9 +124,7 @@ export default function Home() {
 
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="rounded-lg bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
-                <BarChart3 className="h-6 w-6 text-primary" />
-              </div>
+              <BarChart3 className="h-8 w-8 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">Detailed Analytics</h3>
               <p className="text-muted-foreground">
                 Track uptime percentage, response times, and incident history with beautiful charts.
@@ -139,9 +134,7 @@ export default function Home() {
 
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="rounded-lg bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
-                <Globe className="h-6 w-6 text-primary" />
-              </div>
+              <Globe className="h-8 w-8 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">Public Status Pages</h3>
               <p className="text-muted-foreground">
                 Share your uptime status with customers. Branded, customizable status pages.
@@ -151,9 +144,7 @@ export default function Home() {
 
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="rounded-lg bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-primary" />
-              </div>
+              <Shield className="h-8 w-8 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">SSL Monitoring</h3>
               <p className="text-muted-foreground">
                 Get notified before your SSL certificates expire. Stay secure and compliant.
@@ -163,9 +154,7 @@ export default function Home() {
 
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardContent className="pt-6">
-              <div className="rounded-lg bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-primary" />
-              </div>
+              <Zap className="h-8 w-8 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">Fast & Reliable</h3>
               <p className="text-muted-foreground">
                 Built on modern infrastructure. 99.9% uptime SLA for our monitoring service.
@@ -173,11 +162,12 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
+        </div>
       </section>
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
-        <Card className="bg-primary text-primary-foreground border-0">
+        <Card className="bg-primary text-primary-foreground border-0 rounded-3xl">
           <CardContent className="p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to Monitor Your Websites?
@@ -196,16 +186,16 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30">
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+      <footer className="border-t brand-bg">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center">
               <Image 
-                src="/logo.png" 
-                alt="PulseMon Logo" 
-                width={128} 
-                height={128}
-                className="h-32 w-32"
+                src="/logo1.png" 
+                alt="PulseMon" 
+                width={100} 
+                height={25}
+                className="w-auto h-auto max-h-50"
               />
             </div>
             <p className="text-sm text-muted-foreground">

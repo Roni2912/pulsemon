@@ -57,24 +57,23 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           {/* Header */}
           <div className="flex items-center justify-between h-16 px-4 border-b">
             {isOpen ? (
-              <Link href="/dashboard" className="flex items-center space-x-3">
+              <Link href="/dashboard" className="flex items-center">
                 <Image 
-                  src="/logo.png" 
-                  alt="PulseMon Logo" 
-                  width={40} 
+                  src="/logo1.png" 
+                  alt="PulseMon" 
+                  width={160} 
                   height={40}
-                  className="h-10 w-10"
+                  className="h-10"
                 />
-                <span className="font-bold text-xl">PulseMon</span>
               </Link>
             ) : (
               <Link href="/dashboard" className="flex items-center justify-center">
                 <Image 
-                  src="/logo.png" 
-                  alt="PulseMon Logo" 
-                  width={32} 
-                  height={32}
-                  className="h-8 w-8"
+                  src="/logo1.png" 
+                  alt="PulseMon" 
+                  width={40} 
+                  height={40}
+                  className="h-10 w-10"
                 />
               </Link>
             )}
