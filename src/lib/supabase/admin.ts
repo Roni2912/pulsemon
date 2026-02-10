@@ -67,22 +67,11 @@ export async function performMonitorCheck(monitorId: string) {
       return { success: false, error: 'Failed to record check result' }
     }
 
-    // Update monitor status
+    // Monitor stats (is_up, last_checked_at, total_checks, etc.) are updated
+    // automatically by the DB trigger `checks_update_monitor_stats` on check insert.
+
     const wasUp = monitor.is_up
     const isNowUp = checkResult.success
-
-    await supabaseAdmin
-      .from('monitors')
-      .update({
-        is_up: isNowUp,
-        last_checked_at: new Date().toISOString(),
-        last_response_time_ms: checkResult.responseTime,
-        last_status_code: checkResult.statusCode,
-        last_error: checkResult.error,
-        total_checks: (monitor.total_checks || 0) + 1,
-        successful_checks: (monitor.successful_checks || 0) + (isNowUp ? 1 : 0),
-      })
-      .eq('id', monitorId)
 
     // Handle incident creation/resolution
     if (!isNowUp && wasUp !== false) {

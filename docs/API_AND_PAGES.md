@@ -19,7 +19,7 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | Endpoint | File | Status |
 |----------|------|--------|
 | `/api/checks` | `src/app/api/checks/route.ts` | Stub (501) |
-| `/api/incidents` | `src/app/api/incidents/route.ts` | Stub (501) |
+| GET `/api/incidents` | `src/app/api/incidents/route.ts` | List incidents (?status=open\|resolved, ?limit=50) |
 | `/api/status-pages` | `src/app/api/status-pages/route.ts` | Stub (501) |
 | `/api/settings` | `src/app/api/settings/route.ts` | Stub (501) |
 | `/api/billing` | `src/app/api/billing/route.ts` | Stub (501) |
