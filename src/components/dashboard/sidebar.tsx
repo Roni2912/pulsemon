@@ -94,7 +94,9 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-3 space-y-1">
             {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              const isActive = item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname === item.href || pathname.startsWith(item.href + "/");
               return (
                 <Link
                   key={item.name}

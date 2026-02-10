@@ -132,6 +132,7 @@ export const routeConfig = {
     '/pricing',
     '/features',
     '/status/:path*', // Public status pages
+    '/dashboard/:path*', // TODO: Remove after auth is wired up — temporary bypass for development
   ],
   
   // Auth routes - redirect if already authenticated
@@ -186,10 +187,15 @@ export function matchesPattern(path: string, patterns: string[]): boolean {
  * Get route type for a given path
  */
 export function getRouteType(path: string): 'public' | 'auth' | 'protected' | 'apiProtected' | 'apiPublic' {
+  // Check public first so dev bypass (dashboard in public list) takes priority
+  if (matchesPattern(path, routeConfig.public)) {
+    return 'public'
+  }
+
   if (matchesPattern(path, routeConfig.auth)) {
     return 'auth'
   }
-  
+
   if (matchesPattern(path, routeConfig.protected)) {
     return 'protected'
   }
