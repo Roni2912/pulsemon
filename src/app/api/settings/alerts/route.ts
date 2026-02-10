@@ -1,13 +1,183 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-// GET /api/settings/alerts - Get alert settings
-export async function GET(request: NextRequest) {
-  // TODO: Implement - fetch alert settings from Supabase
-  return NextResponse.json({ message: "Not implemented" }, { status: 501 });
+// GET /api/settings/alerts - Get user's alert settings
+export async function GET() {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get alert settings
+    const { data: settings, error } = await supabase
+      .from('alert_settings')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching alert settings:', error);
+      return NextResponse.json({ error: 'Failed to fetch alert settings' }, { status: 500 });
+    }
+
+    return NextResponse.json({ settings });
+  } catch (error) {
+    console.error('Error in GET /api/settings/alerts:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
-// PATCH /api/settings/alerts - Update alert settings
+// POST /api/settings/alerts - Create new alert setting
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const {
+      name,
+      description,
+      monitor_id,
+      events,
+      channel,
+      channel_config,
+      is_enabled,
+      frequency,
+      max_alerts_per_hour,
+    } = body;
+
+    // Validate required fields
+    if (!name || !events || !channel) {
+      return NextResponse.json(
+        { error: 'Missing required fields: name, events, channel' },
+        { status: 400 }
+      );
+    }
+
+    // Create alert setting
+    const { data: setting, error } = await supabase
+      .from('alert_settings')
+      .insert({
+        user_id: user.id,
+        name,
+        description,
+        monitor_id: monitor_id || null,
+        events,
+        channel,
+        channel_config: channel_config || {},
+        is_enabled: is_enabled !== undefined ? is_enabled : true,
+        frequency: frequency || 'immediate',
+        max_alerts_per_hour: max_alerts_per_hour || 10,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating alert setting:', error);
+      return NextResponse.json(
+        { error: error.message || 'Failed to create alert setting' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ setting }, { status: 201 });
+  } catch (error) {
+    console.error('Error in POST /api/settings/alerts:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// PATCH /api/settings/alerts - Update alert setting
 export async function PATCH(request: NextRequest) {
-  // TODO: Implement - update alert settings in Supabase
-  return NextResponse.json({ message: "Not implemented" }, { status: 501 });
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, ...updates } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing alert setting ID' }, { status: 400 });
+    }
+
+    // Update alert setting
+    const { data: setting, error } = await supabase
+      .from('alert_settings')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating alert setting:', error);
+      return NextResponse.json(
+        { error: error.message || 'Failed to update alert setting' },
+        { status: 500 }
+      );
+    }
+
+    if (!setting) {
+      return NextResponse.json({ error: 'Alert setting not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ setting });
+  } catch (error) {
+    console.error('Error in PATCH /api/settings/alerts:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// DELETE /api/settings/alerts - Delete alert setting
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing alert setting ID' }, { status: 400 });
+    }
+
+    // Delete alert setting
+    const { error } = await supabase
+      .from('alert_settings')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error deleting alert setting:', error);
+      return NextResponse.json(
+        { error: error.message || 'Failed to delete alert setting' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error in DELETE /api/settings/alerts:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

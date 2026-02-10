@@ -21,7 +21,10 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | `/api/checks` | `src/app/api/checks/route.ts` | Stub (501) |
 | GET `/api/incidents` | `src/app/api/incidents/route.ts` | List incidents (?status=open\|resolved, ?limit=50) |
 | `/api/status-pages` | `src/app/api/status-pages/route.ts` | Stub (501) |
-| `/api/settings` | `src/app/api/settings/route.ts` | Stub (501) |
+| GET `/api/settings/alerts` | `src/app/api/settings/alerts/route.ts` | List user's alert settings |
+| POST `/api/settings/alerts` | `src/app/api/settings/alerts/route.ts` | Create new alert setting |
+| PATCH `/api/settings/alerts` | `src/app/api/settings/alerts/route.ts` | Update alert setting |
+| DELETE `/api/settings/alerts` | `src/app/api/settings/alerts/route.ts` | Delete alert setting |
 | `/api/billing` | `src/app/api/billing/route.ts` | Stub (501) |
 | POST `/api/cron/check-monitors` | `src/app/api/cron/check-monitors/route.ts` | Run monitor checks (auth via CRON_SECRET header) |
 | `/api/webhooks` | `src/app/api/webhooks/route.ts` | Stub (501) |
@@ -35,6 +38,8 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | `/dashboard/monitors/new` | `src/app/dashboard/monitors/new/page.tsx` | Create monitor form |
 | `/dashboard/monitors/[id]` | `src/app/dashboard/monitors/[id]/page.tsx` | Monitor detail (stats, info, recent checks) |
 | `/dashboard/monitors/[id]/edit` | `src/app/dashboard/monitors/[id]/edit/page.tsx` | Edit monitor form (pre-filled) |
+| `/dashboard/settings` | `src/app/dashboard/settings/page.tsx` | Settings overview with navigation cards |
+| `/dashboard/settings/alerts` | `src/app/dashboard/settings/alerts/page.tsx` | Alert settings management |
 
 ## Key Components
 
@@ -45,6 +50,7 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | `MonitorList` | `src/components/dashboard/monitor-list.tsx` | Dashboard + Monitors page |
 | `StatsCard` | `src/components/dashboard/stats-card.tsx` | Dashboard + Monitor detail |
 | `DeleteMonitorButton` | `src/app/dashboard/monitors/[id]/delete-button.tsx` | Monitor detail page |
+| `AlertSettingsForm` | `src/components/dashboard/alert-settings-form.tsx` | Alert settings page |
 | `EmptyState` | `src/components/ui/empty-state.tsx` | Multiple pages |
 
 ## Type Mapping (Frontend vs Database)
@@ -79,3 +85,28 @@ The frontend types (`src/types/index.ts`) differ from the Supabase DB schema (`s
 ## Auth Pattern
 
 Currently using mock user ID `00000000-0000-0000-0000-000000000000` in server components (dashboard pages). API routes use `getUser()` from `src/lib/supabase/server.ts` for real auth.
+
+## Email Alert System
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| Resend Client | `src/lib/resend/client.ts` | Resend API client configuration |
+| Email Templates | `src/lib/resend/templates.tsx` | React Email templates (down/recovery) |
+| Alert Logic | `src/lib/resend/alerts.ts` | Send alerts with rate limiting and settings check |
+
+### Alert Flow
+
+1. Monitor check fails/recovers in `performMonitorCheck()` (admin.ts)
+2. Incident created/resolved in database
+3. `sendDownAlert()` or `sendRecoveryAlert()` called
+4. Check user's alert settings and rate limits via `should_send_alert()` RPC
+5. Render email template with React Email
+6. Send via Resend API
+7. Log alert in `alert_logs` table via `record_alert_sent()` RPC
+
+### Environment Variables
+
+- `RESEND_API_KEY`: Resend API key
+- `EMAIL_FROM`: Sender email address (must be verified in Resend)
+- `NEXT_PUBLIC_APP_URL`: App URL for dashboard links in emails
+

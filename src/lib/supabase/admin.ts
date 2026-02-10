@@ -76,7 +76,7 @@ export async function performMonitorCheck(monitorId: string) {
     // Handle incident creation/resolution
     if (!isNowUp && wasUp !== false) {
       // Monitor just went down — create incident
-      await supabaseAdmin
+      const { data: newIncident } = await supabaseAdmin
         .from('incidents')
         .insert({
           monitor_id: monitorId,
@@ -87,6 +87,18 @@ export async function performMonitorCheck(monitorId: string) {
           started_at: new Date().toISOString(),
           detected_at: new Date().toISOString(),
         })
+        .select()
+        .single()
+
+      // Send down alert email
+      if (newIncident) {
+        try {
+          const { sendDownAlert } = await import('@/lib/resend/alerts')
+          await sendDownAlert(monitor, newIncident)
+        } catch (error) {
+          console.error('Error sending down alert:', error)
+        }
+      }
     } else if (isNowUp && wasUp === false) {
       // Monitor recovered — resolve open incidents
       const { data: openIncidents } = await supabaseAdmin
@@ -110,6 +122,20 @@ export async function performMonitorCheck(monitorId: string) {
               resolution_summary: 'Monitor recovered automatically',
             })
             .eq('id', incident.id)
+
+          // Send recovery alert email
+          try {
+            const { sendRecoveryAlert } = await import('@/lib/resend/alerts')
+            await sendRecoveryAlert(monitor, {
+              id: incident.id,
+              title: `${monitor.name} recovered`,
+              description: 'Monitor recovered automatically',
+              started_at: incident.started_at,
+              duration_seconds: durationSeconds,
+            })
+          } catch (error) {
+            console.error('Error sending recovery alert:', error)
+          }
         }
       }
     }
