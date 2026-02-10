@@ -14,13 +14,22 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | PATCH | `/api/monitors/[id]` | `src/app/api/monitors/[id]/route.ts` | Update monitor fields |
 | DELETE | `/api/monitors/[id]` | `src/app/api/monitors/[id]/route.ts` | Delete monitor (cascade) |
 
+### Status Pages
+
+| Method | Endpoint | File | Description |
+|--------|----------|------|-------------|
+| GET | `/api/status-pages` | `src/app/api/status-pages/route.ts` | List all status pages for authenticated user (includes monitor IDs via junction table) |
+| POST | `/api/status-pages` | `src/app/api/status-pages/route.ts` | Create a status page (validates with `statusPageSchema`, inserts junction rows, handles slug uniqueness 409 and plan limit 403) |
+| GET | `/api/status-pages/[id]` | `src/app/api/status-pages/[id]/route.ts` | Get single status page with monitor IDs |
+| PATCH | `/api/status-pages/[id]` | `src/app/api/status-pages/[id]/route.ts` | Update status page fields; if `monitors` provided, replaces junction table rows |
+| DELETE | `/api/status-pages/[id]` | `src/app/api/status-pages/[id]/route.ts` | Delete status page (cascade deletes junction rows) |
+
 ### Other API Routes (scaffolded, not yet implemented)
 
 | Endpoint | File | Status |
 |----------|------|--------|
 | `/api/checks` | `src/app/api/checks/route.ts` | Stub (501) |
 | GET `/api/incidents` | `src/app/api/incidents/route.ts` | List incidents (?status=open\|resolved, ?limit=50) |
-| `/api/status-pages` | `src/app/api/status-pages/route.ts` | Stub (501) |
 | GET `/api/settings/alerts` | `src/app/api/settings/alerts/route.ts` | List user's alert settings |
 | POST `/api/settings/alerts` | `src/app/api/settings/alerts/route.ts` | Create new alert setting |
 | PATCH `/api/settings/alerts` | `src/app/api/settings/alerts/route.ts` | Update alert setting |
@@ -38,8 +47,17 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | `/dashboard/monitors/new` | `src/app/dashboard/monitors/new/page.tsx` | Create monitor form |
 | `/dashboard/monitors/[id]` | `src/app/dashboard/monitors/[id]/page.tsx` | Monitor detail (stats, info, recent checks) |
 | `/dashboard/monitors/[id]/edit` | `src/app/dashboard/monitors/[id]/edit/page.tsx` | Edit monitor form (pre-filled) |
+| `/dashboard/status-pages` | `src/app/dashboard/status-pages/page.tsx` | Status page list with cards (name, visibility badge, monitor count, slug) |
+| `/dashboard/status-pages/new` | `src/app/dashboard/status-pages/new/page.tsx` | Create status page form |
+| `/dashboard/status-pages/[id]` | `src/app/dashboard/status-pages/[id]/page.tsx` | Status page detail (info cards, linked monitors, inline edit form) |
 | `/dashboard/settings` | `src/app/dashboard/settings/page.tsx` | Settings overview with navigation cards |
 | `/dashboard/settings/alerts` | `src/app/dashboard/settings/alerts/page.tsx` | Alert settings management |
+
+## Public Pages
+
+| Route | File | Description |
+|-------|------|-------------|
+| `/status/[slug]` | `src/app/status/[slug]/page.tsx` | Public status page (uses `supabaseAdmin` to bypass RLS, shows overall status, per-monitor uptime %, 404 for non-existent/private slugs) |
 
 ## Key Components
 
@@ -50,6 +68,8 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | `MonitorList` | `src/components/dashboard/monitor-list.tsx` | Dashboard + Monitors page |
 | `StatsCard` | `src/components/dashboard/stats-card.tsx` | Dashboard + Monitor detail |
 | `DeleteMonitorButton` | `src/app/dashboard/monitors/[id]/delete-button.tsx` | Monitor detail page |
+| `StatusPageForm` | `src/components/dashboard/status-page-form.tsx` | New + Edit status pages (auto-slug, monitor multi-select) |
+| `DeleteStatusPageButton` | `src/app/dashboard/status-pages/[id]/delete-button.tsx` | Status page detail page |
 | `AlertSettingsForm` | `src/components/dashboard/alert-settings-form.tsx` | Alert settings page |
 | `EmptyState` | `src/components/ui/empty-state.tsx` | Multiple pages |
 
@@ -79,7 +99,7 @@ The frontend types (`src/types/index.ts`) differ from the Supabase DB schema (`s
 | Schema | File | Used For |
 |--------|------|----------|
 | `monitorSchema` | `src/lib/utils/validation.ts` | Create/edit monitor forms + API validation |
-| `statusPageSchema` | `src/lib/utils/validation.ts` | Status page forms (future) |
+| `statusPageSchema` | `src/lib/utils/validation.ts` | Create/edit status page forms + API validation |
 | `alertSettingsSchema` | `src/lib/utils/validation.ts` | Alert settings (future) |
 
 ## Auth Pattern

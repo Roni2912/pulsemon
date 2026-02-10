@@ -1,11 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./sidebar";
 import { UserMenu } from "./user-menu";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+
+const pageTitles: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/dashboard/monitors": "Monitors",
+  "/dashboard/incidents": "Incidents",
+  "/dashboard/statistics": "Statistics",
+  "/dashboard/status-pages": "Status Pages",
+  "/dashboard/settings": "Settings",
+};
+
+function getPageTitle(pathname: string): string {
+  // Exact match first
+  if (pageTitles[pathname]) return pageTitles[pathname];
+  // Then prefix match (e.g. /dashboard/monitors/abc → Monitors)
+  for (const [path, title] of Object.entries(pageTitles)) {
+    if (path !== "/dashboard" && pathname.startsWith(path)) return title;
+  }
+  return "Dashboard";
+}
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -14,6 +34,8 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, email }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const pageTitle = getPageTitle(pathname);
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,13 +60,13 @@ export function DashboardLayout({ children, email }: DashboardLayoutProps) {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-base font-semibold">Dashboard</h1>
+            <h1 className="text-base font-semibold">{pageTitle}</h1>
           </div>
           <UserMenu email={email} />
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6">
+        <main className="p-4 lg:p-6 animate-in">
           {children}
         </main>
       </div>

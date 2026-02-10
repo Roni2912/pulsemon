@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +16,7 @@ import {
   Settings,
   Menu,
   ChevronLeft,
+  Loader2,
 } from "lucide-react";
 
 const navigation = [
@@ -32,6 +35,27 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+
+  // Clear navigating state when pathname changes (navigation complete)
+  useEffect(() => {
+    setNavigatingTo(null);
+  }, [pathname]);
+
+  function handleNavClick(e: React.MouseEvent, href: string) {
+    e.preventDefault();
+    if (pathname === href) return;
+    setNavigatingTo(href);
+    startTransition(() => {
+      router.push(href);
+    });
+    // Close mobile sidebar on nav
+    if (isOpen && window.innerWidth < 1024) {
+      onToggle();
+    }
+  }
 
   return (
     <>
@@ -97,12 +121,14 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               const isActive = item.href === "/dashboard"
                 ? pathname === "/dashboard"
                 : pathname === item.href || pathname.startsWith(item.href + "/");
+              const isLoading = navigatingTo === item.href && isPending;
               return (
-                <Link
+                <a
                   key={item.name}
                   href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-sm",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-sm cursor-pointer",
                     isActive
                       ? "bg-[hsl(var(--sidebar-active))] text-[hsl(var(--sidebar-active-foreground))] shadow-sm"
                       : "text-[hsl(var(--sidebar-muted))] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-foreground))]",
@@ -110,12 +136,16 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                   )}
                   title={!isOpen ? item.name : undefined}
                 >
-                  <item.icon className={cn(
-                    "h-[1.125rem] w-[1.125rem] flex-shrink-0",
-                    isActive && "text-[hsl(var(--sidebar-active-foreground))]"
-                  )} />
+                  {isLoading ? (
+                    <Loader2 className="h-[1.125rem] w-[1.125rem] flex-shrink-0 animate-spin" />
+                  ) : (
+                    <item.icon className={cn(
+                      "h-[1.125rem] w-[1.125rem] flex-shrink-0",
+                      isActive && "text-[hsl(var(--sidebar-active-foreground))]"
+                    )} />
+                  )}
                   {isOpen && <span className="font-medium">{item.name}</span>}
-                </Link>
+                </a>
               );
             })}
           </nav>
