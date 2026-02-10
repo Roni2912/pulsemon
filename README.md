@@ -1,128 +1,137 @@
-# Pulsemon
+# PulseMon
 
-Open-source uptime monitoring SaaS with status pages, alerts, and analytics.
+Website monitoring platform that tracks uptime, response times, and incidents with instant alerts and public status pages.
 
 ## Features
 
-- **Uptime Monitoring** - Monitor websites and APIs with customizable intervals
-- **Instant Alerts** - Get notified via email when services go down
-- **Status Pages** - Beautiful public status pages for your users
-- **Incident Tracking** - Automatic incident detection and resolution tracking
-- **Analytics** - Response time charts and uptime statistics
-- **Multi-plan Support** - Free and paid tiers with Stripe integration
+- **Real-time Monitoring** - Check websites and APIs every 1-5 minutes with configurable intervals
+- **Instant Email Alerts** - Get notified immediately when services go down or recover, powered by Resend
+- **Public Status Pages** - Branded, shareable status pages showing real-time uptime for your customers
+- **Incident Tracking** - Automatic incident detection, duration tracking, and resolution logging
+- **Response Time Charts** - Interactive visualizations of response time trends and downtime periods
+- **Uptime Statistics** - Track uptime across 24h, 7d, and 30d windows with detailed analytics
+- **SSL Monitoring** - Monitor SSL certificate validity and get warned before expiry
+- **Multi-plan Billing** - Free tier with 5 monitors, paid plans via Stripe (Starter, Pro, Business)
+- **Team Collaboration** - Invite team members and share monitors across your organization
+- **Webhook Integrations** - Send alerts to Slack, PagerDuty, Discord, or any custom webhook endpoint
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
-- **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth
-- **Payments**: Stripe
-- **Email**: Resend
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Charts**: Recharts
-- **Deployment**: Vercel
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 14 (App Router) |
+| Database | Supabase (PostgreSQL + Row Level Security) |
+| Authentication | Supabase Auth (cookie-based sessions) |
+| Payments | Stripe (Checkout, Webhooks, Customer Portal) |
+| Email | Resend (SMTP for auth emails + API for alerts) |
+| UI | Tailwind CSS + shadcn/ui |
+| Charts | Recharts |
+| Deployment | Vercel |
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- Supabase account
-- Stripe account
-- Resend account
+- Supabase project
+- Stripe account (for billing)
+- Resend account (for email alerts)
 
-### Installation
+### Setup
+
+1. **Install dependencies**
 
 ```bash
-# Clone the repository
-git clone https://github.com/Roni2912/pulsemon.git
-cd pulsemon
-
-# Install dependencies
 npm install
-
-# Copy environment variables
-cp .env.local.example .env.local
-
-# Start development server
-npm run dev
 ```
 
-### Environment Variables
+2. **Configure environment variables**
+
+```bash
+cp .env.local.example .env.local
+```
+
+Fill in the required values:
 
 ```env
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+
+# Stripe
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_PRICE_ID_STARTER=
+STRIPE_PRICE_ID_PRO=
+STRIPE_PRICE_ID_BUSINESS=
+
+# Resend
 RESEND_API_KEY=
+EMAIL_FROM=
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 CRON_SECRET=
-NEXT_PUBLIC_APP_URL=
 ```
 
-## Project Structure
+3. **Configure Supabase**
 
-```
-src/
-├── app/
-│   ├── (marketing)/              # Public pages (landing, pricing, features)
-│   │   ├── layout.tsx
-│   │   └── page.tsx              # Landing page
-│   ├── (auth)/                   # Auth pages (redirect if logged in)
-│   │   ├── layout.tsx
-│   │   ├── login/page.tsx
-│   │   ├── signup/page.tsx
-│   │   └── reset-password/page.tsx
-│   ├── dashboard/                # Protected - requires authentication
-│   │   ├── layout.tsx            # Sidebar + auth guard
-│   │   ├── page.tsx              # Dashboard overview
-│   │   ├── monitors/
-│   │   │   ├── page.tsx          # Monitor list
-│   │   │   ├── new/page.tsx      # Create monitor
-│   │   │   └── [id]/page.tsx     # Monitor detail
-│   │   ├── incidents/page.tsx
-│   │   ├── statistics/page.tsx
-│   │   ├── status-pages/
-│   │   │   ├── page.tsx
-│   │   │   └── [id]/page.tsx
-│   │   └── settings/page.tsx
-│   ├── status/[slug]/page.tsx    # Public status pages
-│   ├── api/
-│   │   ├── monitors/
-│   │   │   ├── route.ts          # GET (list), POST (create)
-│   │   │   └── [id]/route.ts     # GET, PATCH, DELETE
-│   │   ├── checks/route.ts       # GET (paginated)
-│   │   ├── incidents/route.ts    # GET (paginated)
-│   │   ├── status-pages/
-│   │   │   ├── route.ts          # GET, POST
-│   │   │   └── [id]/route.ts     # GET, PATCH, DELETE
-│   │   ├── settings/
-│   │   │   └── alerts/route.ts   # GET, PATCH
-│   │   ├── billing/
-│   │   │   ├── checkout/route.ts # POST (Stripe checkout)
-│   │   │   └── portal/route.ts   # POST (Stripe portal)
-│   │   ├── cron/
-│   │   │   └── check-monitors/route.ts  # POST (cron job)
-│   │   └── webhooks/
-│   │       └── stripe/route.ts   # POST (Stripe webhooks)
-│   ├── layout.tsx                # Root layout
-│   └── globals.css
-├── components/
-│   ├── auth/                     # Login, signup, password reset forms
-│   ├── dashboard/                # Sidebar, header, user menu
-│   └── ui/                       # shadcn/ui components
-├── lib/
-│   ├── supabase/                 # Supabase clients (browser, server, admin, middleware)
-│   ├── utils/                    # Date, uptime, validation helpers
-│   ├── constants.ts              # App constants, plans, config
-│   └── utils.ts                  # cn() utility
-├── hooks/                        # Custom React hooks
-├── types/                        # TypeScript definitions
-└── middleware.ts                  # Route protection & auth
+- Set up the database schema (tables, RLS policies, triggers)
+- Configure authentication email templates to redirect to `/auth/callback`
+- Set Site URL to your app URL under Authentication > URL Configuration
+- (Optional) Configure Resend SMTP under Authentication > SMTP Settings for branded auth emails
+
+4. **Start development server**
+
+```bash
+npm run dev
 ```
 
-## License
+The app will be available at [http://localhost:3000](http://localhost:3000).
 
-MIT
+## Plans
+
+| Feature | Free | Starter ($9/mo) | Pro ($29/mo) | Business ($99/mo) |
+|---------|------|-----------------|-------------|-------------------|
+| Monitors | 5 | 10 | 50 | 200 |
+| Check Interval | 5 min | 3 min | 1 min | 1 min |
+| Data History | 7 days | 30 days | 90 days | 365 days |
+| Status Pages | 1 | 3 | 10 | 50 |
+| Team Members | 1 | 3 | 10 | 50 |
+| Alert Channels | Email | Email, Webhook | Email, Webhook, Slack | All + SMS |
+
+## Deployment
+
+### Vercel
+
+1. Connect your repository to Vercel
+2. Add all environment variables from `.env.local`
+3. Deploy
+
+### Cron Job
+
+Set up a cron job to hit `POST /api/cron/check-monitors` at your desired frequency (e.g., every minute). Include the `Authorization: Bearer <CRON_SECRET>` header.
+
+On Vercel, configure this in `vercel.json`:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/check-monitors",
+      "schedule": "* * * * *"
+    }
+  ]
+}
+```
+
+## Scripts
+
+| Command | Description |
+|---------|------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
