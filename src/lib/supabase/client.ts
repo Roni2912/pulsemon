@@ -6,10 +6,8 @@
  */
 
 import { createBrowserClient } from '@supabase/ssr'
-import { Database } from '../../types/supabase'
-
 // Create a singleton client for browser usage
-let client: ReturnType<typeof createBrowserClient<Database>> | undefined
+let client: ReturnType<typeof createBrowserClient> | undefined
 
 export function createClient() {
   // Return existing client if already created (singleton pattern)
@@ -18,7 +16,7 @@ export function createClient() {
   }
 
   // Create new browser client
-  client = createBrowserClient<Database>(
+  client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
@@ -31,4 +29,3 @@ export const supabase = createClient()
 
 // Type exports for better TypeScript support
 export type SupabaseClient = typeof supabase
-export type { Database } from '../../types/supabase'

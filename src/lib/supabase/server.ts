@@ -7,12 +7,10 @@
 
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { Database } from '../../types/supabase'
-
 export async function createServerSupabaseClient() {
   const cookieStore = cookies()
 
-  return createServerClient<Database>(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -124,4 +122,3 @@ export async function checkUserPermission(action: 'create_monitor' | 'create_sta
 
 // Type exports
 export type ServerSupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>
-export type { Database } from '../../types/supabase'

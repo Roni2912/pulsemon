@@ -8,10 +8,9 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { Database } from '../../types/supabase'
 
 // Admin client with service role key (bypasses RLS)
-export const supabaseAdmin = createClient<Database>(
+export const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   {
@@ -80,7 +79,7 @@ export async function performMonitorCheck(monitorId: string) {
  * Perform HTTP check on a monitor
  * Returns detailed check results including timing and SSL information
  */
-async function performHttpCheck(monitor: Database['public']['Tables']['monitors']['Row']) {
+async function performHttpCheck(monitor: any) {
   const startTime = Date.now()
   let dnsTime = 0
   let connectTime = 0
@@ -195,7 +194,7 @@ export async function getMonitorsToCheck() {
 
   // Filter monitors that are due for checking
   const now = Date.now()
-  return monitors.filter((monitor: Database['public']['Tables']['monitors']['Row']) => {
+  return monitors.filter((monitor: any) => {
     if (!monitor.last_checked_at) return true
     
     const lastCheck = new Date(monitor.last_checked_at).getTime()
@@ -279,4 +278,3 @@ export async function getSystemHealth() {
 
 // Type exports
 export type AdminSupabaseClient = typeof supabaseAdmin
-export type { Database } from '../../types/supabase'
