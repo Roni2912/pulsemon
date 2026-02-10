@@ -6,7 +6,6 @@ import {
   Globe,
   Clock,
   Activity,
-  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Monitor, Check } from "@/types";
 import { DeleteMonitorButton } from "./delete-button";
+import { MonitorStatsDisplay } from "@/components/dashboard/monitor-stats-display";
 
 function mapDbToMonitor(row: any): Monitor {
   return {
@@ -107,8 +107,6 @@ export default async function MonitorDetailPage({
   const checks = (dbChecks || []).map(mapDbToCheck);
   const config = statusConfig[monitor.status];
 
-  const uptimePercentage = dbMonitor.uptime_percentage ?? null;
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -140,8 +138,8 @@ export default async function MonitorDetailPage({
         </div>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Basic info cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
@@ -149,17 +147,6 @@ export default async function MonitorDetailPage({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{config.label}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Uptime</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {uptimePercentage !== null ? `${uptimePercentage.toFixed(1)}%` : "N/A"}
-            </div>
           </CardContent>
         </Card>
         <Card>
@@ -182,6 +169,9 @@ export default async function MonitorDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Statistics cards - using new component */}
+      <MonitorStatsDisplay monitorId={id} />
 
       {/* Monitor details */}
       <Card>
