@@ -15,6 +15,7 @@ const pageTitles: Record<string, string> = {
   "/statistics": "Statistics",
   "/status-pages": "Status Pages",
   "/settings": "Settings",
+  "/profile": "Profile",
 };
 
 function getPageTitle(pathname: string): string {
@@ -30,9 +31,10 @@ function getPageTitle(pathname: string): string {
 interface DashboardLayoutProps {
   children: React.ReactNode;
   email: string;
+  name?: string;
 }
 
-export function DashboardLayout({ children, email }: DashboardLayoutProps) {
+export function DashboardLayout({ children, email, name }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const pageTitle = getPageTitle(pathname);
@@ -62,7 +64,7 @@ export function DashboardLayout({ children, email }: DashboardLayoutProps) {
             </Button>
             <h1 className="text-base font-semibold">{pageTitle}</h1>
           </div>
-          <UserMenu email={email} />
+          <UserMenu email={email} name={name} />
         </header>
 
         {/* Page content */}

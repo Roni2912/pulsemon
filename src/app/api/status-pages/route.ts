@@ -88,7 +88,6 @@ export async function POST(request: NextRequest) {
       slug: data.slug,
       description: data.description ?? null,
       is_public: data.is_public,
-      show_values: data.show_values,
     })
     .select()
     .single();

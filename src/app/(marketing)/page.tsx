@@ -4,22 +4,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Activity, 
-  Bell, 
-  BarChart3, 
-  Globe, 
-  Shield, 
+import {
+  Activity,
+  Bell,
+  BarChart3,
+  Globe,
+  Shield,
   Zap,
   CheckCircle2,
   ArrowRight,
   Menu,
   X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen brand-gradient">
@@ -43,12 +51,20 @@ export default function Home() {
             <Link href="#pricing" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
               Pricing
             </Link>
-            <Link href="/login" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
-              Sign In
-            </Link>
-            <Button asChild size="default" className="font-semibold lg:text-base">
-              <Link href="/signup">Get Started</Link>
-            </Button>
+            {isLoggedIn ? (
+              <Button asChild size="default" className="font-semibold lg:text-base">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
+                  Sign In
+                </Link>
+                <Button asChild size="default" className="font-semibold lg:text-base">
+                  <Link href="/signup">Get Started</Link>
+                </Button>
+              </>
+            )}
           </nav>
           
           {/* Mobile Menu Button */}
@@ -69,30 +85,38 @@ export default function Home() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t bg-background">
             <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
-              <Link 
-                href="#features" 
+              <Link
+                href="#features"
                 className="text-base font-semibold hover:text-primary transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Features
               </Link>
-              <Link 
-                href="#pricing" 
+              <Link
+                href="#pricing"
                 className="text-base font-semibold hover:text-primary transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Pricing
               </Link>
-              <Link 
-                href="/login" 
-                className="text-base font-semibold hover:text-primary transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-              <Button asChild size="lg" className="font-semibold w-full">
-                <Link href="/signup">Get Started</Link>
-              </Button>
+              {isLoggedIn ? (
+                <Button asChild size="lg" className="font-semibold w-full">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-base font-semibold hover:text-primary transition-colors py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Button asChild size="lg" className="font-semibold w-full">
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </>
+              )}
             </nav>
           </div>
         )}

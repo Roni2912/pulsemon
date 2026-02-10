@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Monitor, Check } from "@/types";
 import { DeleteMonitorButton } from "./delete-button";
 import { MonitorStatsDisplay } from "@/components/dashboard/monitor-stats-display";
@@ -80,16 +80,14 @@ export default async function MonitorDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
-  // Use mock user matching existing pattern
-  const mockUserId = "00000000-0000-0000-0000-000000000000";
+  const user = await getUser();
   const supabase = await createServerSupabaseClient();
 
   const { data: dbMonitor, error } = await supabase
     .from("monitors")
     .select("*")
     .eq("id", id)
-    .eq("user_id", mockUserId)
+    .eq("user_id", user!.id)
     .single();
 
   if (error || !dbMonitor) {

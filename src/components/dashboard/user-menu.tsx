@@ -17,16 +17,16 @@ import { useToast } from "@/hooks/use-toast";
 
 interface UserMenuProps {
   email: string;
+  name?: string;
 }
 
-export function UserMenu({ email }: UserMenuProps) {
+export function UserMenu({ email, name }: UserMenuProps) {
   const router = useRouter();
   const { toast } = useToast();
 
-  const initials = email
-    .split("@")[0]
-    .substring(0, 2)
-    .toUpperCase();
+  const initials = name
+    ? name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase()
+    : email.split("@")[0].substring(0, 2).toUpperCase();
 
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
@@ -61,7 +61,7 @@ export function UserMenu({ email }: UserMenuProps) {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Account</p>
+            <p className="text-sm font-medium leading-none">{name || "Account"}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {email}
             </p>

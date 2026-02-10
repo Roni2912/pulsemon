@@ -42,7 +42,7 @@ export function PasswordResetForm() {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-        redirectTo: `${window.location.origin}/reset-password/confirm`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password/confirm`,
       });
 
       if (error) {

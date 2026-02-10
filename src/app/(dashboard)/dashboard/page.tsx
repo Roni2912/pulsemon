@@ -59,6 +59,33 @@ async function getDashboardStats(userId: string): Promise<DashboardStats> {
   };
 }
 
+function mapDbToMonitor(row: any): Monitor {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    name: row.name,
+    url: row.url,
+    type: row.type,
+    method: row.method,
+    interval: Math.round(row.interval_seconds / 60),
+    timeout: row.timeout_seconds * 1000,
+    status: row.status === "active"
+      ? row.is_up === false
+        ? "down"
+        : row.is_up === true
+          ? "up"
+          : "pending"
+      : "paused",
+    expected_status_code: row.expected_status_codes?.[0],
+    headers: row.headers as Record<string, string> | undefined,
+    body: row.body,
+    last_checked_at: row.last_checked_at,
+    consecutive_failures: 0,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
 async function getRecentMonitors(userId: string): Promise<Monitor[]> {
   const supabase = await createServerSupabaseClient();
 
@@ -73,32 +100,25 @@ async function getRecentMonitors(userId: string): Promise<Monitor[]> {
     return [];
   }
 
-  return monitors as Monitor[];
+  return monitors.map(mapDbToMonitor);
 }
 
 export default async function DashboardPage() {
-  // Temporarily use mock user for preview (no auth)
-  const mockUserId = "00000000-0000-0000-0000-000000000000";
-  
-  const stats = await getDashboardStats(mockUserId);
-  const recentMonitors = await getRecentMonitors(mockUserId);
+  const user = await getUser();
+  const userId = user!.id;
+
+  const stats = await getDashboardStats(userId);
+  const recentMonitors = await getRecentMonitors(userId);
 
   // Show empty state if no monitors
   if (stats.total_monitors === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
-          <p className="text-sm text-muted-foreground">
-            Here&apos;s an overview of your monitors
-          </p>
-        </div>
-
-        <EmptyState
-          title="No monitors yet"
-          description="Get started by creating your first monitor to track website uptime."
-        />
-        <div className="flex justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <EmptyState
+            title="No monitors yet"
+            description="Get started by creating your first monitor to track website uptime."
+          />
           <Button asChild>
             <Link href="/monitors/new">Create Monitor</Link>
           </Button>
@@ -109,12 +129,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
-        <p className="text-sm text-muted-foreground">
-          Here&apos;s an overview of your monitors
-        </p>
-      </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard

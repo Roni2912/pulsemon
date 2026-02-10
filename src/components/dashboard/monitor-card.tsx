@@ -46,7 +46,7 @@ const statusConfig = {
 };
 
 export function MonitorCard({ monitor, uptime, avgResponseTime }: MonitorCardProps) {
-  const config = statusConfig[monitor.status];
+  const config = statusConfig[monitor.status] || statusConfig.pending;
 
   return (
     <Card className="hover:shadow-md transition-shadow">

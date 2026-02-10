@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StatusPage } from "@/types";
 
 function mapDbToStatusPage(row: any, monitorIds: string[]): StatusPage {
@@ -50,18 +50,12 @@ async function getStatusPages(userId: string): Promise<StatusPage[]> {
 }
 
 export default async function StatusPagesPage() {
-  const mockUserId = "00000000-0000-0000-0000-000000000000";
-  const statusPages = await getStatusPages(mockUserId);
+  const user = await getUser();
+  const statusPages = await getStatusPages(user!.id);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Status Pages</h2>
-          <p className="text-sm text-muted-foreground">
-            Manage your public status pages
-          </p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button asChild>
           <Link href="/status-pages/new">
             <Plus className="mr-2 h-4 w-4" />

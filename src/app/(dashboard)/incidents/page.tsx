@@ -1,5 +1,5 @@
 import { AlertCircle } from "lucide-react";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import { IncidentTimeline } from "@/components/dashboard/incident-timeline";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -33,8 +33,8 @@ async function getIncidents(userId: string) {
 }
 
 export default async function IncidentsPage() {
-  const mockUserId = "00000000-0000-0000-0000-000000000000";
-  const incidents = await getIncidents(mockUserId);
+  const user = await getUser();
+  const incidents = await getIncidents(user!.id);
 
   const ongoing = incidents.filter(
     (i: any) => i.status !== "resolved"
@@ -45,19 +45,14 @@ export default async function IncidentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Incidents</h2>
-        <p className="text-sm text-muted-foreground">
-          View and manage incidents across your monitors
-        </p>
-      </div>
-
       {incidents.length === 0 ? (
-        <EmptyState
-          icon={AlertCircle}
-          title="No incidents"
-          description="No incidents have been recorded yet. Incidents are created automatically when a monitor goes down."
-        />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <EmptyState
+            icon={AlertCircle}
+            title="No incidents"
+            description="No incidents have been recorded yet. Incidents are created automatically when a monitor goes down."
+          />
+        </div>
       ) : (
         <div className="space-y-8">
           {ongoing.length > 0 && (

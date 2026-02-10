@@ -4,12 +4,7 @@ import { Bell, CreditCard, User } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-        <p className="text-sm text-muted-foreground">Manage your account and preferences</p>
-      </div>
-
+    <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/settings/alerts">
           <Card className="hover:bg-accent transition-colors cursor-pointer">
@@ -30,22 +25,24 @@ export default function SettingsPage() {
           </Card>
         </Link>
 
-        <Card className="opacity-50">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <User className="h-8 w-8 text-muted-foreground" />
-              <div>
-                <CardTitle>Profile</CardTitle>
-                <CardDescription>Coming soon</CardDescription>
+        <Link href="/profile">
+          <Card className="hover:bg-accent transition-colors cursor-pointer">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <User className="h-8 w-8 text-primary" />
+                <div>
+                  <CardTitle>Profile</CardTitle>
+                  <CardDescription>Manage your account</CardDescription>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Update your profile information and preferences
-            </p>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Update your profile information and preferences
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card className="opacity-50">
           <CardHeader>

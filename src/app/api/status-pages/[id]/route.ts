@@ -90,7 +90,7 @@ export async function PATCH(
   if (data.slug !== undefined) updateFields.slug = data.slug;
   if (data.description !== undefined) updateFields.description = data.description ?? null;
   if (data.is_public !== undefined) updateFields.is_public = data.is_public;
-  if (data.show_values !== undefined) updateFields.show_values = data.show_values;
+
 
   if (Object.keys(updateFields).length > 0) {
     const { error } = await supabase

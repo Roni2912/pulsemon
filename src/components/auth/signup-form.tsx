@@ -71,34 +71,18 @@ export function SignupForm() {
         return;
       }
 
-      if (authData.user) {
-        // Create profile record
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert({
-            id: authData.user.id,
-            email: values.email,
-            plan: "free",
-            max_monitors: 5,
-            max_checks_per_minute: 1,
-            max_status_pages: 1,
-          });
-
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-          toast({
-            variant: "destructive",
-            title: "Profile creation failed",
-            description: "Your account was created but profile setup failed. Please contact support.",
-          });
-          return;
-        }
-
+      if (authData.session) {
+        toast({
+          title: "Welcome to PulseMon!",
+          description: "Your account has been created.",
+        });
+        router.push("/dashboard");
+        router.refresh();
+      } else if (authData.user) {
         toast({
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
-        
         router.push("/login");
       }
     } catch (error) {

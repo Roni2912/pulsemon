@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import { MonitorForm } from "@/components/dashboard/monitor-form";
 
 export default async function EditMonitorPage({
@@ -18,15 +18,14 @@ export default async function EditMonitorPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
-  const mockUserId = "00000000-0000-0000-0000-000000000000";
+  const user = await getUser();
   const supabase = await createServerSupabaseClient();
 
   const { data: dbMonitor, error } = await supabase
     .from("monitors")
     .select("*")
     .eq("id", id)
-    .eq("user_id", mockUserId)
+    .eq("user_id", user!.id)
     .single();
 
   if (error || !dbMonitor) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MonitorList } from "@/components/dashboard/monitor-list";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Monitor } from "@/types";
 
 function mapDbToMonitor(row: any): Monitor {
@@ -45,19 +45,12 @@ async function getMonitors(userId: string): Promise<Monitor[]> {
 }
 
 export default async function MonitorsPage() {
-  // Temporarily use mock user for preview (matching dashboard/page.tsx pattern)
-  const mockUserId = "00000000-0000-0000-0000-000000000000";
-  const monitors = await getMonitors(mockUserId);
+  const user = await getUser();
+  const monitors = await getMonitors(user!.id);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Monitors</h2>
-          <p className="text-sm text-muted-foreground">
-            Manage your website monitors
-          </p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button asChild>
           <Link href="/monitors/new">
             <Plus className="mr-2 h-4 w-4" />

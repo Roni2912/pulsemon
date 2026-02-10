@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StatusPage } from "@/types";
 import { DeleteStatusPageButton } from "./delete-button";
 import { StatusPageForm } from "@/components/dashboard/status-page-form";
@@ -39,14 +39,14 @@ export default async function StatusPageDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const mockUserId = "00000000-0000-0000-0000-000000000000";
+  const user = await getUser();
   const supabase = await createServerSupabaseClient();
 
   const { data: dbPage, error } = await supabase
     .from("status_pages")
     .select("*")
     .eq("id", id)
-    .eq("user_id", mockUserId)
+    .eq("user_id", user!.id)
     .single();
 
   if (error || !dbPage) {

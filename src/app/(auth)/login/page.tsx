@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { LoginForm } from "@/components/auth/login-form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Shield, BarChart3 } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function LoginPage() {
   return (
@@ -96,7 +98,9 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <LoginForm />
+              <Suspense fallback={<div className="flex justify-center py-4"><LoadingSpinner /></div>}>
+                <LoginForm />
+              </Suspense>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3 pt-2">
               <div className="text-sm text-muted-foreground text-center">
