@@ -144,19 +144,29 @@ pulsemon/
 │   │   │   ├── layout.tsx
 │   │   │   └── page.tsx              # Landing page
 │   │   │
-│   │   ├── dashboard/                # Protected routes (requires auth)
+│   │   ├── (dashboard)/              # Dashboard route group (no URL prefix)
 │   │   │   ├── layout.tsx            # Dashboard layout + sidebar
-│   │   │   ├── page.tsx              # Dashboard overview
+│   │   │   ├── loading.tsx           # Shared loading state
+│   │   │   ├── error.tsx             # Shared error boundary
+│   │   │   ├── dashboard/page.tsx    # Dashboard overview (/dashboard)
 │   │   │   ├── monitors/
-│   │   │   │   ├── page.tsx          # Monitor list
-│   │   │   │   ├── new/page.tsx      # Create new monitor
-│   │   │   │   └── [id]/page.tsx     # Monitor details & edit
-│   │   │   ├── incidents/page.tsx    # Incident tracking
-│   │   │   ├── statistics/page.tsx   # Analytics & uptime stats
+│   │   │   │   ├── page.tsx          # Monitor list (/monitors)
+│   │   │   │   ├── new/page.tsx      # Create new monitor (/monitors/new)
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx      # Monitor details (/monitors/[id])
+│   │   │   │       ├── edit/page.tsx # Edit monitor (/monitors/[id]/edit)
+│   │   │   │       └── delete-button.tsx
+│   │   │   ├── incidents/page.tsx    # Incident tracking (/incidents)
+│   │   │   ├── statistics/page.tsx   # Analytics & uptime stats (/statistics)
 │   │   │   ├── status-pages/
-│   │   │   │   ├── page.tsx          # Status page list
-│   │   │   │   └── [id]/page.tsx     # Status page editor
-│   │   │   └── settings/page.tsx     # User settings & alerts
+│   │   │   │   ├── page.tsx          # Status page list (/status-pages)
+│   │   │   │   ├── new/page.tsx      # Create status page (/status-pages/new)
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx      # Status page editor (/status-pages/[id])
+│   │   │   │       └── delete-button.tsx
+│   │   │   └── settings/
+│   │   │       ├── page.tsx          # User settings (/settings)
+│   │   │       └── alerts/page.tsx   # Alert settings (/settings/alerts)
 │   │   │
 │   │   ├── status/[slug]/page.tsx    # Public status pages (public access)
 │   │   │
@@ -269,8 +279,10 @@ pulsemon/
 - **Protection**: Middleware redirects unauthenticated users from protected routes
 
 ### 2. **Dashboard**
-- **Location**: `src/app/dashboard/`
-- **Features**: 
+- **Location**: `src/app/(dashboard)/` (route group — no `/dashboard/` URL prefix)
+- **URL Pattern**: Clean URLs — `/monitors`, `/statistics`, `/status-pages`, `/settings`, `/incidents`
+  - The overview page remains at `/dashboard`
+- **Features**:
   - Monitor management (CRUD operations)
   - Incident tracking and history
   - Statistics and analytics
@@ -513,7 +525,7 @@ All tables include Row-Level Security (RLS) policies to ensure users can only ac
 ### User Action Flow (Create Monitor)
 
 ```
-1. User fills form → /dashboard/monitors/new
+1. User fills form → /monitors/new
          ↓
 2. Form submitted to POST /api/monitors
          ↓

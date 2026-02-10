@@ -73,7 +73,7 @@ export default async function StatusPageDetailPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/dashboard/status-pages">
+            <Link href="/status-pages">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -169,7 +169,7 @@ export default async function StatusPageDetailPage({
                     className="flex items-center justify-between py-2 border-b last:border-0"
                   >
                     <Link
-                      href={`/dashboard/monitors/${monitor.id}`}
+                      href={`/monitors/${monitor.id}`}
                       className="text-sm font-medium hover:underline"
                     >
                       {monitor.name}

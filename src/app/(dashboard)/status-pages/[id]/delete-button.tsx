@@ -43,7 +43,7 @@ export function DeleteStatusPageButton({ statusPageId }: DeleteStatusPageButtonP
         description: "The status page has been permanently deleted.",
       });
 
-      router.push("/dashboard/status-pages");
+      router.push("/status-pages");
       router.refresh();
     } catch {
       toast({

@@ -100,7 +100,7 @@ export default async function DashboardPage() {
         />
         <div className="flex justify-center">
           <Button asChild>
-            <Link href="/dashboard/monitors/new">Create Monitor</Link>
+            <Link href="/monitors/new">Create Monitor</Link>
           </Button>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Recent Monitors</h3>
           <Button asChild variant="outline" size="sm">
-            <Link href="/dashboard/monitors">View All</Link>
+            <Link href="/monitors">View All</Link>
           </Button>
         </div>
         <MonitorList monitors={recentMonitors} showEmpty={false} />

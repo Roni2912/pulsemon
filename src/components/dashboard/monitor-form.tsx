@@ -84,9 +84,9 @@ export function MonitorForm({ mode, defaultValues, monitorId }: MonitorFormProps
       });
 
       if (mode === "create") {
-        router.push("/dashboard/monitors");
+        router.push("/monitors");
       } else {
-        router.push(`/dashboard/monitors/${monitorId}`);
+        router.push(`/monitors/${monitorId}`);
       }
       router.refresh();
     } catch {

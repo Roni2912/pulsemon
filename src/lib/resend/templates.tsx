@@ -90,7 +90,7 @@ export const MonitorDownEmail = ({
             This alert was sent because you have notifications enabled for this monitor.
           </Text>
           <Text style={footerText}>
-            <Link href={`${dashboardUrl.split('/dashboard')[0]}/dashboard/settings/alerts`} style={footerLink}>
+            <Link href={`${dashboardUrl.split('/monitors')[0]}/settings/alerts`} style={footerLink}>
               Manage alert settings
             </Link>
           </Text>
@@ -172,7 +172,7 @@ export const MonitorRecoveryEmail = ({
             This alert was sent because you have notifications enabled for this monitor.
           </Text>
           <Text style={footerText}>
-            <Link href={`${dashboardUrl.split('/dashboard')[0]}/dashboard/settings/alerts`} style={footerLink}>
+            <Link href={`${dashboardUrl.split('/monitors')[0]}/settings/alerts`} style={footerLink}>
               Manage alert settings
             </Link>
           </Text>

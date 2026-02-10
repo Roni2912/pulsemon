@@ -59,7 +59,7 @@ export default async function MonitorsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/monitors/new">
+          <Link href="/monitors/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Monitor
           </Link>

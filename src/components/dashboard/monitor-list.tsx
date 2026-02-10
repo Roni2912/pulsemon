@@ -14,7 +14,7 @@ export function MonitorList({ monitors, showEmpty = true }: MonitorListProps) {
         title="No monitors found"
         description="Create your first monitor to start tracking website uptime."
         actionLabel="Create Monitor"
-        actionHref="/dashboard/monitors/new"
+        actionHref="/monitors/new"
       />
     );
   }

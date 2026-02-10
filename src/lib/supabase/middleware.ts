@@ -133,6 +133,11 @@ export const routeConfig = {
     '/features',
     '/status/:path*', // Public status pages
     '/dashboard/:path*', // TODO: Remove after auth is wired up — temporary bypass for development
+    '/monitors/:path*',
+    '/incidents/:path*',
+    '/statistics/:path*',
+    '/status-pages/:path*',
+    '/settings/:path*',
   ],
   
   // Auth routes - redirect if already authenticated

@@ -48,7 +48,7 @@ export default async function EditMonitorPage({
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link href={`/dashboard/monitors/${id}`}>
+          <Link href={`/monitors/${id}`}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>

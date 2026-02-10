@@ -43,7 +43,7 @@ export function DeleteMonitorButton({ monitorId }: DeleteMonitorButtonProps) {
         description: "The monitor has been permanently deleted.",
       });
 
-      router.push("/dashboard/monitors");
+      router.push("/monitors");
       router.refresh();
     } catch {
       toast({

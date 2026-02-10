@@ -125,9 +125,9 @@ export function StatusPageForm({ mode, defaultValues, statusPageId }: StatusPage
       });
 
       if (mode === "create") {
-        router.push("/dashboard/status-pages");
+        router.push("/status-pages");
       } else {
-        router.push(`/dashboard/status-pages/${statusPageId}`);
+        router.push(`/status-pages/${statusPageId}`);
       }
       router.refresh();
     } catch {

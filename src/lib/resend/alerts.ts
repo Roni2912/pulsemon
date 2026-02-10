@@ -76,7 +76,7 @@ export async function sendDownAlert(monitor: Monitor, incident: Incident) {
         monitorUrl: monitor.url,
         errorMessage: incident.description,
         incidentTime: new Date(incident.started_at).toLocaleString(),
-        dashboardUrl: `${APP_URL}/dashboard/monitors/${monitor.id}`,
+        dashboardUrl: `${APP_URL}/monitors/${monitor.id}`,
       })
     );
 
@@ -183,7 +183,7 @@ export async function sendRecoveryAlert(monitor: Monitor, incident: Incident) {
         monitorUrl: monitor.url,
         downtimeDuration,
         recoveryTime: new Date().toLocaleString(),
-        dashboardUrl: `${APP_URL}/dashboard/monitors/${monitor.id}`,
+        dashboardUrl: `${APP_URL}/monitors/${monitor.id}`,
       })
     );
 

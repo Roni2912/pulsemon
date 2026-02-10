@@ -10,11 +10,11 @@ import { Menu } from "lucide-react";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/dashboard/monitors": "Monitors",
-  "/dashboard/incidents": "Incidents",
-  "/dashboard/statistics": "Statistics",
-  "/dashboard/status-pages": "Status Pages",
-  "/dashboard/settings": "Settings",
+  "/monitors": "Monitors",
+  "/incidents": "Incidents",
+  "/statistics": "Statistics",
+  "/status-pages": "Status Pages",
+  "/settings": "Settings",
 };
 
 function getPageTitle(pathname: string): string {

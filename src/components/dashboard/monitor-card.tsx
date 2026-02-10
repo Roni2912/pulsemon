@@ -56,7 +56,7 @@ export function MonitorCard({ monitor, uptime, avgResponseTime }: MonitorCardPro
             <div className={cn("h-3 w-3 rounded-full flex-shrink-0", config.color)} />
             <div className="flex-1 min-w-0">
               <Link
-                href={`/dashboard/monitors/${monitor.id}`}
+                href={`/monitors/${monitor.id}`}
                 className="font-semibold hover:underline truncate block"
               >
                 {monitor.name}
@@ -72,10 +72,10 @@ export function MonitorCard({ monitor, uptime, avgResponseTime }: MonitorCardPro
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/monitors/${monitor.id}`}>View Details</Link>
+                <Link href={`/monitors/${monitor.id}`}>View Details</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/monitors/${monitor.id}/edit`}>Edit</Link>
+                <Link href={`/monitors/${monitor.id}/edit`}>Edit</Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
             </DropdownMenuContent>

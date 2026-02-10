@@ -11,7 +11,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link href="/dashboard/settings/alerts">
+        <Link href="/settings/alerts">
           <Card className="hover:bg-accent transition-colors cursor-pointer">
             <CardHeader>
               <div className="flex items-center gap-3">

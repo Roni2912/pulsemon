@@ -114,7 +114,7 @@ export default async function MonitorDetailPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/dashboard/monitors">
+            <Link href="/monitors">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -130,7 +130,7 @@ export default async function MonitorDetailPage({
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/monitors/${id}/edit`}>
+            <Link href={`/monitors/${id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
               Edit
             </Link>

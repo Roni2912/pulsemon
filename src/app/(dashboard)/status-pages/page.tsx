@@ -63,7 +63,7 @@ export default async function StatusPagesPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/status-pages/new">
+          <Link href="/status-pages/new">
             <Plus className="mr-2 h-4 w-4" />
             Create Status Page
           </Link>
@@ -76,12 +76,12 @@ export default async function StatusPagesPage() {
           title="No status pages yet"
           description="Create a status page to share uptime information with your customers."
           actionLabel="Create Status Page"
-          actionHref="/dashboard/status-pages/new"
+          actionHref="/status-pages/new"
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {statusPages.map((page) => (
-            <Link key={page.id} href={`/dashboard/status-pages/${page.id}`}>
+            <Link key={page.id} href={`/status-pages/${page.id}`}>
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                   <CardTitle className="text-base font-medium">
