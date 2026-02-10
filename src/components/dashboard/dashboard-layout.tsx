@@ -62,7 +62,7 @@ export function DashboardLayout({ children, email, name }: DashboardLayoutProps)
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-base font-semibold">{pageTitle}</h1>
+            <h1 className="text-lg sm:text-xl font-semibold">{pageTitle}</h1>
           </div>
           <UserMenu email={email} name={name} />
         </header>

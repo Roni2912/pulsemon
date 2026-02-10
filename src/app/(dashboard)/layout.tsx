@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser, getUserProfile } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 export default async function Layout({
   children,
