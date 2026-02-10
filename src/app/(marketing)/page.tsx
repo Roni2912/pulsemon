@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Activity,
   Bell,
@@ -14,10 +14,50 @@ import {
   CheckCircle2,
   ArrowRight,
   Menu,
-  X
+  X,
+  Check,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { PLANS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+
+const pricingPlans = [
+  {
+    key: "FREE" as const,
+    popular: false,
+    cta: "Get Started Free",
+    description: "For personal projects",
+  },
+  {
+    key: "STARTER" as const,
+    popular: false,
+    cta: "Start Free Trial",
+    description: "For growing teams",
+  },
+  {
+    key: "PRO" as const,
+    popular: true,
+    cta: "Start Free Trial",
+    description: "For professionals",
+  },
+  {
+    key: "BUSINESS" as const,
+    popular: false,
+    cta: "Contact Sales",
+    description: "For enterprises",
+  },
+];
+
+function getHighlightFeatures(key: keyof typeof PLANS) {
+  const plan = PLANS[key];
+  return [
+    `${plan.monitors} monitors`,
+    `${plan.checkInterval}-min checks`,
+    `${plan.historyDays}-day history`,
+    `${plan.statusPages} status page${plan.statusPages > 1 ? "s" : ""}`,
+  ];
+}
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,7 +106,7 @@ export default function Home() {
               </>
             )}
           </nav>
-          
+
           {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
@@ -129,12 +169,12 @@ export default function Home() {
             Monitor Your Websites
             <span className="block text-primary mt-2">Stay Online 24/7</span>
           </h1>
-          
+
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl px-4">
-            Get instant alerts when your website goes down. Track uptime, response times, 
+            Get instant alerts when your website goes down. Track uptime, response times,
             and incidents with our powerful monitoring platform.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4 w-full sm:w-auto px-4 sm:px-0">
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
               <Link href="/signup">
@@ -156,6 +196,10 @@ export default function Home() {
               <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
               <span>5 monitors free</span>
             </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+              <span>14-day free trial on paid plans</span>
+            </div>
           </div>
         </div>
       </section>
@@ -164,80 +208,167 @@ export default function Home() {
       <section id="features" className="w-full brand-bg py-12 sm:py-16 md:py-20">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
+              Everything You Need to Stay Online
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
+              Powerful features to monitor, alert, and analyze your website&apos;s uptime
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
+                <Activity className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Real-time Monitoring</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Check your websites every minute. Get instant notifications when something goes wrong.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
+                <Bell className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Smart Alerts</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Email, SMS, Slack, and webhook notifications. Never miss a downtime incident.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
+                <BarChart3 className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Detailed Analytics</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Track uptime percentage, response times, and incident history with beautiful charts.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
+                <Globe className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Public Status Pages</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Share your uptime status with customers. Branded, customizable status pages.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
+                <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">SSL Monitoring</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Get notified before your SSL certificates expire. Stay secure and compliant.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
+                <Zap className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">Fast & Reliable</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Built on modern infrastructure. 99.9% uptime SLA for our monitoring service.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-10">
+            <Button asChild variant="outline" size="lg" className="font-semibold">
+              <Link href="/features">
+                View All Features
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20">
+        <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
-            Everything You Need to Stay Online
+            Simple, Transparent Pricing
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-            Powerful features to monitor, alert, and analyze your website&apos;s uptime
+            Start free and scale as you grow. No hidden fees.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
-              <Activity className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Real-time Monitoring</h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Check your websites every minute. Get instant notifications when something goes wrong.
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
+          {pricingPlans.map((plan) => {
+            const data = PLANS[plan.key];
+            const features = getHighlightFeatures(plan.key);
 
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
-              <Bell className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Smart Alerts</h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Email, SMS, Slack, and webhook notifications. Never miss a downtime incident.
-              </p>
-            </CardContent>
-          </Card>
+            return (
+              <Card
+                key={plan.key}
+                className={cn(
+                  "border-2 transition-colors relative flex flex-col",
+                  plan.popular
+                    ? "border-primary shadow-card scale-[1.02]"
+                    : "hover:border-primary/50"
+                )}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                      <Zap className="h-3 w-3" />
+                      Popular
+                    </span>
+                  </div>
+                )}
+                <CardHeader className="pb-4 pt-6">
+                  <h3 className="text-lg font-semibold">{data.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {plan.description}
+                  </p>
+                </CardHeader>
+                <CardContent className="flex flex-col flex-1">
+                  <div className="mb-5">
+                    <span className="text-3xl font-bold">${data.price}</span>
+                    <span className="text-muted-foreground text-sm">/mo</span>
+                  </div>
 
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
-              <BarChart3 className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Detailed Analytics</h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Track uptime percentage, response times, and incident history with beautiful charts.
-              </p>
-            </CardContent>
-          </Card>
+                  <ul className="space-y-2.5 mb-6 flex-1">
+                    {features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2 text-sm">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
-              <Globe className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Public Status Pages</h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Share your uptime status with customers. Branded, customizable status pages.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
-              <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">SSL Monitoring</h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Get notified before your SSL certificates expire. Stay secure and compliant.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardContent className="pt-5 sm:pt-6 px-4 sm:px-6">
-              <Zap className="h-7 w-7 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Fast & Reliable</h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Built on modern infrastructure. 99.9% uptime SLA for our monitoring service.
-              </p>
-            </CardContent>
-          </Card>
+                  <Button
+                    asChild
+                    size="default"
+                    variant={plan.popular ? "default" : "outline"}
+                    className="w-full font-semibold"
+                  >
+                    <Link href={isLoggedIn ? "/settings" : "/signup"}>
+                      {plan.cta}
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
+
+        <div className="text-center mt-8">
+          <Link href="/pricing" className="text-sm font-semibold text-primary hover:underline">
+            Compare all plan features →
+          </Link>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20">
+      <section className="container mx-auto px-4 sm:px-6 pb-12 sm:pb-16 md:pb-20">
         <Card className="bg-primary text-primary-foreground border-0 rounded-2xl sm:rounded-3xl">
           <CardContent className="p-8 sm:p-10 md:p-12 text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-2">
@@ -270,7 +401,7 @@ export default function Home() {
               />
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground text-center">
-              © 2024 PulseMon. All rights reserved.
+              &copy; 2025 PulseMon. All rights reserved.
             </p>
             <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
               <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>

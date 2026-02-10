@@ -1,0 +1,310 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Check,
+  ArrowRight,
+  Menu,
+  X,
+  Zap,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
+import { PLANS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+
+const plans = [
+  {
+    key: "FREE" as const,
+    popular: false,
+    cta: "Get Started Free",
+    description: "Perfect for personal projects and getting started with monitoring.",
+  },
+  {
+    key: "STARTER" as const,
+    popular: false,
+    cta: "Start Free Trial",
+    description: "For growing teams that need more monitors and longer history.",
+  },
+  {
+    key: "PRO" as const,
+    popular: true,
+    cta: "Start Free Trial",
+    description: "For professional teams requiring advanced monitoring and integrations.",
+  },
+  {
+    key: "BUSINESS" as const,
+    popular: false,
+    cta: "Contact Sales",
+    description: "For large organizations with enterprise-grade requirements.",
+  },
+];
+
+function getPlanFeatures(key: keyof typeof PLANS) {
+  const plan = PLANS[key];
+  return [
+    `${plan.monitors} monitors`,
+    `${plan.checkInterval}-minute check interval`,
+    `${plan.historyDays}-day data history`,
+    `${plan.statusPages} status page${plan.statusPages > 1 ? "s" : ""}`,
+    `${plan.teamMembers} team member${plan.teamMembers > 1 ? "s" : ""}`,
+    ...plan.alertChannels.map(
+      (ch) => `${ch.charAt(0).toUpperCase() + ch.slice(1)} alerts`
+    ),
+  ];
+}
+
+const faqs = [
+  {
+    q: "Can I upgrade or downgrade anytime?",
+    a: "Yes, you can change your plan at any time. When upgrading, you'll be charged the prorated difference. When downgrading, the change takes effect at the end of your billing cycle.",
+  },
+  {
+    q: "What happens when I hit my monitor limit?",
+    a: "You'll need to upgrade to add more monitors. Existing monitors will continue to work normally.",
+  },
+  {
+    q: "Is there a free trial for paid plans?",
+    a: "Yes, all paid plans come with a 14-day free trial. No credit card required to start.",
+  },
+  {
+    q: "What payment methods do you accept?",
+    a: "We accept all major credit cards (Visa, Mastercard, American Express) through Stripe. Enterprise plans can also pay via invoice.",
+  },
+];
+
+export default function PricingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+  }, []);
+
+  return (
+    <div className="min-h-screen brand-gradient">
+      {/* Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between overflow-hidden">
+          <Link href="/" className="flex items-center overflow-hidden">
+            <Image
+              src="/logo1.png"
+              alt="PulseMon"
+              width={240}
+              height={160}
+              className="h-14 sm:h-32 w-auto object-contain"
+              priority
+            />
+          </Link>
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <Link href="/features" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
+              Features
+            </Link>
+            <Link href="/pricing" className="text-sm lg:text-base font-semibold text-primary">
+              Pricing
+            </Link>
+            {isLoggedIn ? (
+              <Button asChild size="default" className="font-semibold lg:text-base">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
+                  Sign In
+                </Link>
+                <Button asChild size="default" className="font-semibold lg:text-base">
+                  <Link href="/signup">Get Started</Link>
+                </Button>
+              </>
+            )}
+          </nav>
+
+          <button
+            className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t bg-background">
+            <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
+              <Link href="/features" className="text-base font-semibold hover:text-primary transition-colors py-2" onClick={() => setMobileMenuOpen(false)}>
+                Features
+              </Link>
+              <Link href="/pricing" className="text-base font-semibold text-primary py-2" onClick={() => setMobileMenuOpen(false)}>
+                Pricing
+              </Link>
+              {isLoggedIn ? (
+                <Button asChild size="lg" className="font-semibold w-full">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Link href="/login" className="text-base font-semibold hover:text-primary transition-colors py-2" onClick={() => setMobileMenuOpen(false)}>
+                    Sign In
+                  </Link>
+                  <Button asChild size="lg" className="font-semibold w-full">
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </>
+              )}
+            </nav>
+          </div>
+        )}
+      </header>
+
+      {/* Hero */}
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-24">
+        <div className="text-center max-w-3xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            Simple, Transparent
+            <span className="block text-primary mt-2">Pricing</span>
+          </h1>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+            Start free and scale as you grow. No hidden fees, no surprises.
+            All plans include a 14-day free trial.
+          </p>
+        </div>
+      </section>
+
+      {/* Pricing Cards */}
+      <section className="w-full brand-bg py-12 sm:py-16 md:py-20">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
+            {plans.map((plan) => {
+              const data = PLANS[plan.key];
+              const features = getPlanFeatures(plan.key);
+
+              return (
+                <Card
+                  key={plan.key}
+                  className={cn(
+                    "border-2 transition-colors relative flex flex-col",
+                    plan.popular
+                      ? "border-primary shadow-card scale-[1.02]"
+                      : "hover:border-primary/50"
+                  )}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        Most Popular
+                      </span>
+                    </div>
+                  )}
+                  <CardHeader className="pb-4 pt-6">
+                    <h3 className="text-lg font-semibold">{data.name}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {plan.description}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="flex flex-col flex-1">
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold">
+                        ${data.price}
+                      </span>
+                      <span className="text-muted-foreground">/mo</span>
+                    </div>
+
+                    <ul className="space-y-3 mb-8 flex-1">
+                      {features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Button
+                      asChild
+                      size="lg"
+                      variant={plan.popular ? "default" : "outline"}
+                      className="w-full font-semibold"
+                    >
+                      <Link href={isLoggedIn ? "/settings" : "/signup"}>
+                        {plan.cta}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-6">
+            {faqs.map((faq) => (
+              <div key={faq.q} className="border-b pb-6">
+                <h3 className="text-base font-semibold mb-2">{faq.q}</h3>
+                <p className="text-sm text-muted-foreground">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="container mx-auto px-4 sm:px-6 pb-12 sm:pb-16 md:pb-20">
+        <Card className="bg-primary text-primary-foreground border-0 rounded-2xl sm:rounded-3xl">
+          <CardContent className="p-8 sm:p-10 md:p-12 text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+              Start Monitoring Today
+            </h2>
+            <p className="text-base sm:text-lg mb-8 opacity-90 max-w-2xl mx-auto">
+              Get started with 5 free monitors. No credit card required.
+              Upgrade anytime as your needs grow.
+            </p>
+            <Button asChild size="lg" variant="secondary" className="text-base px-8">
+              <Link href="/signup">
+                Get Started Free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t brand-bg">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+            <div className="flex items-center overflow-hidden">
+              <Image
+                src="/logo1.png"
+                alt="PulseMon"
+                width={200}
+                height={130}
+                className="h-12 sm:h-20 w-auto object-contain"
+              />
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground text-center">
+              &copy; 2025 PulseMon. All rights reserved.
+            </p>
+            <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
+              <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
+              <Link href="#" className="hover:text-primary transition-colors">Terms</Link>
+              <Link href="#" className="hover:text-primary transition-colors">Contact</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

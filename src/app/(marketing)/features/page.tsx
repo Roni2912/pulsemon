@@ -1,5 +1,7 @@
-import Link from "next/link";
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -15,7 +17,11 @@ import {
   LineChart,
   Users,
   Lock,
+  Menu,
+  X,
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 const features = [
   {
@@ -93,11 +99,20 @@ const features = [
 ];
 
 export default function FeaturesPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen brand-gradient">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between overflow-hidden">
           <Link href="/" className="flex items-center overflow-hidden">
             <Image
               src="/logo1.png"
@@ -112,17 +127,60 @@ export default function FeaturesPage() {
             <Link href="/features" className="text-sm lg:text-base font-semibold text-primary">
               Features
             </Link>
-            <Link href="/login" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
-              Sign In
+            <Link href="/pricing" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
+              Pricing
             </Link>
-            <Button asChild size="default" className="font-semibold">
-              <Link href="/signup">Get Started</Link>
-            </Button>
+            {isLoggedIn ? (
+              <Button asChild size="default" className="font-semibold lg:text-base">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm lg:text-base font-semibold hover:text-primary transition-colors">
+                  Sign In
+                </Link>
+                <Button asChild size="default" className="font-semibold lg:text-base">
+                  <Link href="/signup">Get Started</Link>
+                </Button>
+              </>
+            )}
           </nav>
-          <Button asChild size="sm" className="md:hidden">
-            <Link href="/signup">Get Started</Link>
-          </Button>
+
+          <button
+            className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t bg-background">
+            <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
+              <Link href="/features" className="text-base font-semibold text-primary py-2" onClick={() => setMobileMenuOpen(false)}>
+                Features
+              </Link>
+              <Link href="/pricing" className="text-base font-semibold hover:text-primary transition-colors py-2" onClick={() => setMobileMenuOpen(false)}>
+                Pricing
+              </Link>
+              {isLoggedIn ? (
+                <Button asChild size="lg" className="font-semibold w-full">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Link href="/login" className="text-base font-semibold hover:text-primary transition-colors py-2" onClick={() => setMobileMenuOpen(false)}>
+                    Sign In
+                  </Link>
+                  <Button asChild size="lg" className="font-semibold w-full">
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </>
+              )}
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Hero */}
@@ -136,12 +194,17 @@ export default function FeaturesPage() {
             PulseMon provides comprehensive monitoring, alerting, and reporting tools
             to ensure your websites and APIs are always available.
           </p>
-          <Button asChild size="lg" className="text-base px-8">
-            <Link href="/signup">
-              Start Free Trial
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild size="lg" className="text-base px-8">
+              <Link href="/signup">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="text-base px-8">
+              <Link href="/pricing">View Pricing</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -198,7 +261,7 @@ export default function FeaturesPage() {
               />
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              © 2024 PulseMon. All rights reserved.
+              &copy; 2025 PulseMon. All rights reserved.
             </p>
             <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
               <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
