@@ -14,6 +14,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Monitor, Check } from "@/types";
 import { DeleteMonitorButton } from "./delete-button";
 import { MonitorStatsDisplay } from "@/components/dashboard/monitor-stats-display";
+import { UptimeChart } from "@/components/dashboard/uptime-chart";
 
 function mapDbToMonitor(row: any): Monitor {
   return {
@@ -172,6 +173,9 @@ export default async function MonitorDetailPage({
 
       {/* Statistics cards - using new component */}
       <MonitorStatsDisplay monitorId={id} />
+
+      {/* Response time chart */}
+      <UptimeChart monitorId={id} hours={24} />
 
       {/* Monitor details */}
       <Card>
