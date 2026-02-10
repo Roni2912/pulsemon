@@ -67,6 +67,64 @@ export async function performMonitorCheck(monitorId: string) {
       return { success: false, error: 'Failed to record check result' }
     }
 
+    // Update monitor status
+    const wasUp = monitor.is_up
+    const isNowUp = checkResult.success
+
+    await supabaseAdmin
+      .from('monitors')
+      .update({
+        is_up: isNowUp,
+        last_checked_at: new Date().toISOString(),
+        last_response_time_ms: checkResult.responseTime,
+        last_status_code: checkResult.statusCode,
+        last_error: checkResult.error,
+        total_checks: (monitor.total_checks || 0) + 1,
+        successful_checks: (monitor.successful_checks || 0) + (isNowUp ? 1 : 0),
+      })
+      .eq('id', monitorId)
+
+    // Handle incident creation/resolution
+    if (!isNowUp && wasUp !== false) {
+      // Monitor just went down — create incident
+      await supabaseAdmin
+        .from('incidents')
+        .insert({
+          monitor_id: monitorId,
+          title: `${monitor.name} is down`,
+          description: checkResult.error || 'Monitor check failed',
+          status: 'open',
+          severity: 'major',
+          started_at: new Date().toISOString(),
+          detected_at: new Date().toISOString(),
+        })
+    } else if (isNowUp && wasUp === false) {
+      // Monitor recovered — resolve open incidents
+      const { data: openIncidents } = await supabaseAdmin
+        .from('incidents')
+        .select('id, started_at')
+        .eq('monitor_id', monitorId)
+        .in('status', ['open', 'investigating', 'identified', 'monitoring'])
+
+      if (openIncidents && openIncidents.length > 0) {
+        const now = new Date()
+        for (const incident of openIncidents) {
+          const startedAt = new Date(incident.started_at)
+          const durationSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000)
+
+          await supabaseAdmin
+            .from('incidents')
+            .update({
+              status: 'resolved',
+              resolved_at: now.toISOString(),
+              duration_seconds: durationSeconds,
+              resolution_summary: 'Monitor recovered automatically',
+            })
+            .eq('id', incident.id)
+        }
+      }
+    }
+
     return { success: true, result: checkResult }
 
   } catch (error) {

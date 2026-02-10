@@ -23,7 +23,7 @@ Quick reference for all API endpoints and page files to avoid re-exploring the c
 | `/api/status-pages` | `src/app/api/status-pages/route.ts` | Stub (501) |
 | `/api/settings` | `src/app/api/settings/route.ts` | Stub (501) |
 | `/api/billing` | `src/app/api/billing/route.ts` | Stub (501) |
-| `/api/cron` | `src/app/api/cron/route.ts` | Stub (501) |
+| POST `/api/cron/check-monitors` | `src/app/api/cron/check-monitors/route.ts` | Run monitor checks (auth via CRON_SECRET header) |
 | `/api/webhooks` | `src/app/api/webhooks/route.ts` | Stub (501) |
 
 ## Dashboard Pages
