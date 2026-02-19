@@ -14,13 +14,20 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-60" />
         <div className="relative z-10 flex flex-col justify-between p-10 xl:p-14 text-white w-full">
           <div>
-            <Link href="/" className="inline-block">
+            <Link href="/" className="inline-flex items-center gap-2">
               <Image
-                src="/logo1.png"
+                src="/logo.png"
+                alt="PulseMon icon"
+                width={252}
+                height={258}
+                className="h-12 w-12 object-contain flex-shrink-0 brightness-0 invert"
+              />
+              <Image
+                src="/name.png"
                 alt="PulseMon"
-                width={200}
-                height={130}
-                className="h-28 w-auto object-contain"
+                width={597}
+                height={118}
+                className="h-9 w-auto object-contain brightness-0 invert"
               />
             </Link>
           </div>
@@ -79,13 +86,21 @@ export default function LoginPage() {
         <div className="w-full max-w-[400px]">
           {/* Mobile logo */}
           <div className="lg:hidden mb-8 flex justify-center">
-            <Link href="/">
+            <Link href="/" className="inline-flex items-center gap-2">
               <Image
-                src="/logo1.png"
+                src="/logo.png"
+                alt="PulseMon icon"
+                width={252}
+                height={258}
+                className="h-12 w-12 object-contain flex-shrink-0"
+              />
+              <Image
+                src="/name.png"
                 alt="PulseMon"
-                width={200}
-                height={130}
-                className="h-40 w-auto object-contain"
+                width={597}
+                height={118}
+                className="h-9 w-auto object-contain"
+                style={{ filter: 'brightness(0) saturate(100%) invert(11%) sepia(14%) saturate(1200%) hue-rotate(185deg) brightness(95%) contrast(93%)' }}
               />
             </Link>
           </div>

@@ -78,13 +78,20 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           )}>
             {isOpen ? (
               <>
-                <Link href="/dashboard" className="flex items-center overflow-hidden">
+                <Link href="/dashboard" className="flex items-center gap-1 overflow-hidden">
                   <Image
-                    src="/logo1.png"
+                    src="/logo.png"
+                    alt="PulseMon icon"
+                    width={252}
+                    height={258}
+                    className="h-9 w-9 object-contain flex-shrink-0 brightness-0 invert"
+                  />
+                  <Image
+                    src="/name.png"
                     alt="PulseMon"
-                    width={200}
-                    height={130}
-                    className="h-20 w-auto object-contain"
+                    width={597}
+                    height={118}
+                    className="h-7 w-auto object-contain brightness-0 invert"
                   />
                 </Link>
                 <Button
@@ -97,14 +104,19 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 </Button>
               </>
             ) : (
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={onToggle}
-                className="text-[hsl(var(--sidebar-muted))] hover:text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-hover))] hidden lg:flex w-full h-full rounded-none p-0"
+                className="hidden lg:flex items-center justify-center w-full h-full hover:bg-[hsl(var(--sidebar-hover))] transition-colors"
+                title="Expand sidebar"
               >
-                <Menu className="h-5 w-5" />
-              </Button>
+                <Image
+                  src="/logo.png"
+                  alt="PulseMon"
+                  width={252}
+                  height={258}
+                  className="h-9 w-9 object-contain brightness-0 invert"
+                />
+              </button>
             )}
           </div>
 

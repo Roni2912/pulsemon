@@ -74,13 +74,22 @@ export default function Home() {
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between overflow-hidden">
-          <Link href="/" className="flex items-center overflow-hidden">
+          <Link href="/" className="flex items-center gap-2 overflow-hidden">
             <Image
-              src="/logo1.png"
+              src="/logo.png"
+              alt="PulseMon icon"
+              width={252}
+              height={258}
+              className="h-10 w-10 object-contain flex-shrink-0"
+              priority
+            />
+            <Image
+              src="/name.png"
               alt="PulseMon"
-              width={240}
-              height={160}
-              className="h-14 sm:h-32 w-auto object-contain"
+              width={597}
+              height={118}
+              className="h-8 w-auto object-contain"
+              style={{ filter: 'brightness(0) saturate(100%) invert(11%) sepia(14%) saturate(1200%) hue-rotate(185deg) brightness(95%) contrast(93%)' }}
               priority
             />
           </Link>
@@ -391,13 +400,21 @@ export default function Home() {
       <footer className="border-t brand-bg">
         <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-            <div className="flex items-center overflow-hidden">
+            <div className="flex items-center gap-2 overflow-hidden">
               <Image
-                src="/logo1.png"
+                src="/logo.png"
+                alt="PulseMon icon"
+                width={252}
+                height={258}
+                className="h-9 w-9 object-contain flex-shrink-0"
+              />
+              <Image
+                src="/name.png"
                 alt="PulseMon"
-                width={200}
-                height={130}
-                className="h-12 sm:h-20 w-auto object-contain"
+                width={597}
+                height={118}
+                className="h-7 w-auto object-contain"
+                style={{ filter: 'brightness(0) saturate(100%) invert(11%) sepia(14%) saturate(1200%) hue-rotate(185deg) brightness(95%) contrast(93%)' }}
               />
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground text-center">
