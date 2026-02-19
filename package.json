@@ -1,7 +1,29 @@
 {
-  "name": "uptime-monitor",
+  "name": "pulsemon",
   "version": "1.0.0",
-  "private": true,
+  "description": "Open-source website uptime monitoring with instant alerts and public status pages",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Roni2912/pulsemon.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Roni2912/pulsemon/issues"
+  },
+  "homepage": "https://github.com/Roni2912/pulsemon#readme",
+  "keywords": [
+    "uptime-monitoring",
+    "website-monitoring",
+    "status-page",
+    "nextjs",
+    "supabase",
+    "typescript",
+    "monitoring",
+    "alerting",
+    "saas"
+  ],
+  "author": "Ronish Dudhat <contact.pulsemon@gmail.com>",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

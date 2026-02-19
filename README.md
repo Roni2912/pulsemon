@@ -1,5 +1,9 @@
 # PulseMon
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+
 Website monitoring platform that tracks uptime, response times, and incidents with instant alerts and public status pages.
 
 ## Features
@@ -135,3 +139,38 @@ On Vercel, configure this in `vercel.json`:
 | `npm run build` | Build for production |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📄 License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+
+## 🔒 Security
+
+See [SECURITY.md](SECURITY.md) for security policies and reporting vulnerabilities.
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org/) - React framework
+- [Supabase](https://supabase.com/) - Backend and database
+- [shadcn/ui](https://ui.shadcn.com/) - UI components
+- [Resend](https://resend.com/) - Email delivery
+- [Stripe](https://stripe.com/) - Payment processing
+
+## ⭐ Star History
+
+If you find this project useful, please consider giving it a star!
+
+## 📧 Support
+
+- 📖 [Documentation](docs/)
+- 🐛 [Report Bug](https://github.com/Roni2912/pulsemon/issues)
+- 💡 [Request Feature](https://github.com/Roni2912/pulsemon/issues)
+- 💬 [Discussions](https://github.com/Roni2912/pulsemon/discussions)
+
+---
+
+Built with ❤️ by Ronish Dudhat(https://github.com/Roni2912)
