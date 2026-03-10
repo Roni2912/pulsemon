@@ -42,7 +42,6 @@ export function AlertSettingsForm() {
       const data = await response.json();
       setSettings(data.settings || []);
     } catch (error) {
-      console.error('Error fetching alert settings:', error);
       toast({
         title: 'Error',
         description: 'Failed to load alert settings',
@@ -82,7 +81,6 @@ export function AlertSettingsForm() {
 
       await fetchSettings();
     } catch (error: any) {
-      console.error('Error creating alert setting:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to create alert setting',
@@ -113,7 +111,6 @@ export function AlertSettingsForm() {
 
       await fetchSettings();
     } catch (error) {
-      console.error('Error toggling alert setting:', error);
       toast({
         title: 'Error',
         description: 'Failed to update alert setting',
@@ -141,7 +138,6 @@ export function AlertSettingsForm() {
 
       await fetchSettings();
     } catch (error) {
-      console.error('Error deleting alert setting:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete alert setting',

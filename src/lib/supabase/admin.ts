@@ -8,6 +8,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/logger'
 
 // Admin client with service role key (bypasses RLS)
 export const supabaseAdmin = createClient(
@@ -36,7 +37,7 @@ export async function performMonitorCheck(monitorId: string) {
       .single()
 
     if (monitorError || !monitor) {
-      console.error('Monitor not found or inactive:', monitorId)
+      logger.warn('MONITOR_NOT_FOUND', { context: 'performMonitorCheck', reason: monitorId })
       return { success: false, error: 'Monitor not found or inactive' }
     }
 
@@ -63,7 +64,7 @@ export async function performMonitorCheck(monitorId: string) {
       })
 
     if (insertError) {
-      console.error('Error inserting check result:', insertError)
+      logger.error('CHECK_INSERT_FAILED', { context: 'performMonitorCheck', reason: insertError.message })
       return { success: false, error: 'Failed to record check result' }
     }
 
@@ -95,8 +96,8 @@ export async function performMonitorCheck(monitorId: string) {
         try {
           const { sendDownAlert } = await import('@/lib/resend/alerts')
           await sendDownAlert(monitor, newIncident)
-        } catch (error) {
-          console.error('Error sending down alert:', error)
+        } catch (error: any) {
+          logger.error('DOWN_ALERT_SEND_FAILED', { context: 'performMonitorCheck', reason: error?.message })
         }
       }
     } else if (isNowUp && wasUp === false) {
@@ -133,8 +134,8 @@ export async function performMonitorCheck(monitorId: string) {
               started_at: incident.started_at,
               duration_seconds: durationSeconds,
             })
-          } catch (error) {
-            console.error('Error sending recovery alert:', error)
+          } catch (error: any) {
+            logger.error('RECOVERY_ALERT_SEND_FAILED', { context: 'performMonitorCheck', reason: error?.message })
           }
         }
       }
@@ -142,8 +143,8 @@ export async function performMonitorCheck(monitorId: string) {
 
     return { success: true, result: checkResult }
 
-  } catch (error) {
-    console.error('Error in performMonitorCheck:', error)
+  } catch (error: any) {
+    logger.error('MONITOR_CHECK_FAILED', { context: 'performMonitorCheck', reason: error?.message })
     return { success: false, error: 'Unexpected error during check' }
   }
 }
@@ -261,7 +262,7 @@ export async function getMonitorsToCheck() {
     .or(`last_checked_at.is.null,last_checked_at.lt.${new Date(Date.now() - 60000).toISOString()}`)
 
   if (error) {
-    console.error('Error getting monitors to check:', error)
+    logger.error('GET_MONITORS_FAILED', { context: 'getMonitorsToCheck', reason: error.message })
     return []
   }
 
@@ -284,10 +285,10 @@ export async function getMonitorsToCheck() {
 export async function cleanupOldChecks() {
   try {
     const deletedCount = await supabaseAdmin.rpc('cleanup_old_checks')
-    console.log(`Cleaned up ${deletedCount} old check records`)
+    logger.info('CLEANUP_COMPLETE', { context: 'cleanupOldChecks', reason: `${deletedCount} records removed` })
     return { success: true, deletedCount }
-  } catch (error) {
-    console.error('Error cleaning up old checks:', error)
+  } catch (error: any) {
+    logger.error('CLEANUP_FAILED', { context: 'cleanupOldChecks', reason: error?.message })
     return { success: false, error }
   }
 }
@@ -299,10 +300,10 @@ export async function cleanupOldChecks() {
 export async function refreshMaterializedViews() {
   try {
     await supabaseAdmin.rpc('refresh_monitor_stats')
-    console.log('Refreshed materialized views')
+    logger.info('VIEWS_REFRESHED', { context: 'refreshMaterializedViews' })
     return { success: true }
-  } catch (error) {
-    console.error('Error refreshing materialized views:', error)
+  } catch (error: any) {
+    logger.error('VIEWS_REFRESH_FAILED', { context: 'refreshMaterializedViews', reason: error?.message })
     return { success: false, error }
   }
 }
@@ -343,8 +344,8 @@ export async function getSystemHealth() {
         databaseMetrics: metrics
       }
     }
-  } catch (error) {
-    console.error('Error getting system health:', error)
+  } catch (error: any) {
+    logger.error('SYSTEM_HEALTH_FAILED', { context: 'getSystemHealth', reason: error?.message })
     return { success: false, error }
   }
 }

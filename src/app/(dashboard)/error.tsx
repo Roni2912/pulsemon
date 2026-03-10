@@ -12,9 +12,7 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error("Dashboard error:", error);
-  }, [error]);
+  useEffect(() => {}, [error]);
 
   return (
     <div className="flex items-center justify-center min-h-[60vh]">

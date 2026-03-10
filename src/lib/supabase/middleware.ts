@@ -8,6 +8,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { Database } from '../../types/supabase'
+import { logger } from '../logger'
 
 /**
  * Create Supabase client for middleware
@@ -84,8 +85,8 @@ export async function getAuthenticatedUser(request: NextRequest) {
     }
     
     return user
-  } catch (error) {
-    console.error('Error getting authenticated user:', error)
+  } catch (error: any) {
+    logger.error('GET_AUTH_USER_FAILED', { context: 'getAuthenticatedUser', reason: error?.message })
     return null
   }
 }
@@ -248,7 +249,7 @@ export function validateCronSecret(request: NextRequest): boolean {
   const expectedSecret = process.env.CRON_SECRET
   
   if (!expectedSecret) {
-    console.error('CRON_SECRET environment variable not set')
+    logger.error('CRON_SECRET_MISSING', { context: 'validateCronSecret' })
     return false
   }
   

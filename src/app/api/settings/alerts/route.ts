@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 // GET /api/settings/alerts - Get user's alert settings
 export async function GET() {
@@ -20,13 +21,13 @@ export async function GET() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching alert settings:', error);
+      logger.error('ALERT_SETTINGS_FETCH_FAILED', { context: 'GET /api/settings/alerts', reason: error.message });
       return NextResponse.json({ error: 'Failed to fetch alert settings' }, { status: 500 });
     }
 
     return NextResponse.json({ settings });
-  } catch (error) {
-    console.error('Error in GET /api/settings/alerts:', error);
+  } catch (error: any) {
+    logger.error('ALERT_SETTINGS_FETCH_FAILED', { context: 'GET /api/settings/alerts', reason: error?.message });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating alert setting:', error);
+      logger.error('ALERT_SETTING_CREATE_FAILED', { context: 'POST /api/settings/alerts', reason: error.message });
       return NextResponse.json(
         { error: error.message || 'Failed to create alert setting' },
         { status: 500 }
@@ -90,8 +91,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ setting }, { status: 201 });
-  } catch (error) {
-    console.error('Error in POST /api/settings/alerts:', error);
+  } catch (error: any) {
+    logger.error('ALERT_SETTING_CREATE_FAILED', { context: 'POST /api/settings/alerts', reason: error?.message });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -124,7 +125,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating alert setting:', error);
+      logger.error('ALERT_SETTING_UPDATE_FAILED', { context: 'PATCH /api/settings/alerts', reason: error.message });
       return NextResponse.json(
         { error: error.message || 'Failed to update alert setting' },
         { status: 500 }
@@ -136,8 +137,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ setting });
-  } catch (error) {
-    console.error('Error in PATCH /api/settings/alerts:', error);
+  } catch (error: any) {
+    logger.error('ALERT_SETTING_UPDATE_FAILED', { context: 'PATCH /api/settings/alerts', reason: error?.message });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -168,7 +169,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Error deleting alert setting:', error);
+      logger.error('ALERT_SETTING_DELETE_FAILED', { context: 'DELETE /api/settings/alerts', reason: error.message });
       return NextResponse.json(
         { error: error.message || 'Failed to delete alert setting' },
         { status: 500 }
@@ -176,8 +177,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error in DELETE /api/settings/alerts:', error);
+  } catch (error: any) {
+    logger.error('ALERT_SETTING_DELETE_FAILED', { context: 'DELETE /api/settings/alerts', reason: error?.message });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

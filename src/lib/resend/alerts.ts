@@ -7,6 +7,7 @@ import { render } from '@react-email/components';
 import { resend, EMAIL_FROM, APP_URL } from './client';
 import { MonitorDownEmail, MonitorRecoveryEmail } from './templates';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { logger } from '@/lib/logger';
 
 interface Monitor {
   id: string;
@@ -36,7 +37,7 @@ export async function sendDownAlert(monitor: Monitor, incident: Incident) {
       .single();
 
     if (!profile?.email) {
-      console.error('No email found for user:', monitor.user_id);
+      logger.warn('ALERT_NO_EMAIL', { context: 'sendDownAlert', userId: monitor.user_id });
       return { success: false, error: 'No email found' };
     }
 
@@ -53,7 +54,7 @@ export async function sendDownAlert(monitor: Monitor, incident: Incident) {
       .single();
 
     if (!alertSettings) {
-      console.log('No email alert settings enabled for monitor:', monitor.id);
+      logger.info('ALERT_NOT_CONFIGURED', { context: 'sendDownAlert', monitorId: monitor.id });
       return { success: false, error: 'Alerts not enabled' };
     }
 
@@ -65,7 +66,7 @@ export async function sendDownAlert(monitor: Monitor, incident: Incident) {
       });
 
     if (!shouldSend) {
-      console.log('Alert rate limited or in quiet hours');
+      logger.warn('ALERT_RATE_LIMITED', { context: 'sendDownAlert', monitorId: monitor.id });
       return { success: false, error: 'Rate limited or quiet hours' };
     }
 
@@ -89,9 +90,8 @@ export async function sendDownAlert(monitor: Monitor, incident: Incident) {
     });
 
     if (error) {
-      console.error('Error sending email:', error);
-      
-      // Log failed alert
+      logger.error('DOWN_ALERT_EMAIL_FAILED', { context: 'sendDownAlert', monitorId: monitor.id, reason: error.message });
+
       await supabaseAdmin.rpc('record_alert_sent', {
         p_alert_setting_id: alertSettings.id,
         p_monitor_id: monitor.id,
@@ -106,7 +106,6 @@ export async function sendDownAlert(monitor: Monitor, incident: Incident) {
       return { success: false, error: error.message };
     }
 
-    // Log successful alert
     await supabaseAdmin.rpc('record_alert_sent', {
       p_alert_setting_id: alertSettings.id,
       p_monitor_id: monitor.id,
@@ -118,11 +117,11 @@ export async function sendDownAlert(monitor: Monitor, incident: Incident) {
       p_external_id: data?.id || null,
     });
 
-    console.log('Down alert sent successfully:', data?.id);
+    logger.info('DOWN_ALERT_SENT', { context: 'sendDownAlert', monitorId: monitor.id, emailId: data?.id });
     return { success: true, emailId: data?.id };
 
   } catch (error: any) {
-    console.error('Error in sendDownAlert:', error);
+    logger.error('DOWN_ALERT_FAILED', { context: 'sendDownAlert', monitorId: monitor.id, reason: error?.message });
     return { success: false, error: error.message };
   }
 }
@@ -140,7 +139,7 @@ export async function sendRecoveryAlert(monitor: Monitor, incident: Incident) {
       .single();
 
     if (!profile?.email) {
-      console.error('No email found for user:', monitor.user_id);
+      logger.warn('ALERT_NO_EMAIL', { context: 'sendRecoveryAlert', userId: monitor.user_id });
       return { success: false, error: 'No email found' };
     }
 
@@ -157,7 +156,7 @@ export async function sendRecoveryAlert(monitor: Monitor, incident: Incident) {
       .single();
 
     if (!alertSettings) {
-      console.log('No email alert settings enabled for monitor:', monitor.id);
+      logger.info('ALERT_NOT_CONFIGURED', { context: 'sendRecoveryAlert', monitorId: monitor.id });
       return { success: false, error: 'Alerts not enabled' };
     }
 
@@ -169,7 +168,7 @@ export async function sendRecoveryAlert(monitor: Monitor, incident: Incident) {
       });
 
     if (!shouldSend) {
-      console.log('Alert rate limited or in quiet hours');
+      logger.warn('ALERT_RATE_LIMITED', { context: 'sendRecoveryAlert', monitorId: monitor.id });
       return { success: false, error: 'Rate limited or quiet hours' };
     }
 
@@ -196,9 +195,8 @@ export async function sendRecoveryAlert(monitor: Monitor, incident: Incident) {
     });
 
     if (error) {
-      console.error('Error sending email:', error);
-      
-      // Log failed alert
+      logger.error('RECOVERY_ALERT_EMAIL_FAILED', { context: 'sendRecoveryAlert', monitorId: monitor.id, reason: error.message });
+
       await supabaseAdmin.rpc('record_alert_sent', {
         p_alert_setting_id: alertSettings.id,
         p_monitor_id: monitor.id,
@@ -213,7 +211,6 @@ export async function sendRecoveryAlert(monitor: Monitor, incident: Incident) {
       return { success: false, error: error.message };
     }
 
-    // Log successful alert
     await supabaseAdmin.rpc('record_alert_sent', {
       p_alert_setting_id: alertSettings.id,
       p_monitor_id: monitor.id,
@@ -225,11 +222,11 @@ export async function sendRecoveryAlert(monitor: Monitor, incident: Incident) {
       p_external_id: data?.id || null,
     });
 
-    console.log('Recovery alert sent successfully:', data?.id);
+    logger.info('RECOVERY_ALERT_SENT', { context: 'sendRecoveryAlert', monitorId: monitor.id, emailId: data?.id });
     return { success: true, emailId: data?.id };
 
   } catch (error: any) {
-    console.error('Error in sendRecoveryAlert:', error);
+    logger.error('RECOVERY_ALERT_FAILED', { context: 'sendRecoveryAlert', monitorId: monitor.id, reason: error?.message });
     return { success: false, error: error.message };
   }
 }

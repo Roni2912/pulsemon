@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMonitorsToCheck, performMonitorCheck } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 // POST /api/cron/check-monitors - Run monitor checks (called by cron)
 // Authorization is handled by middleware (validates CRON_SECRET)
@@ -34,8 +35,8 @@ export async function POST() {
       failed,
       duration_ms: Date.now() - startTime,
     });
-  } catch (error) {
-    console.error("Cron check-monitors error:", error);
+  } catch (error: any) {
+    logger.error("CRON_CHECK_MONITORS_FAILED", { context: "cron/check-monitors", reason: error?.message });
     return NextResponse.json(
       { error: "Failed to run monitor checks" },
       { status: 500 }

@@ -7,6 +7,7 @@
 
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { logger } from '../logger'
 export async function createServerSupabaseClient() {
   const cookieStore = cookies()
 
@@ -52,13 +53,13 @@ export async function getUser() {
     const { data: { user }, error } = await supabase.auth.getUser()
     
     if (error) {
-      console.error('Error getting user:', error.message)
+      logger.error('GET_USER_FAILED', { context: 'getUser', reason: error.message })
       return null
     }
-    
+
     return user
-  } catch (error) {
-    console.error('Error in getUser:', error)
+  } catch (error: any) {
+    logger.error('GET_USER_FAILED', { context: 'getUser', reason: error?.message })
     return null
   }
 }
@@ -83,13 +84,13 @@ export async function getUserProfile() {
       .single()
     
     if (error) {
-      console.error('Error getting user profile:', error.message)
+      logger.error('GET_PROFILE_FAILED', { context: 'getUserProfile', reason: error.message })
       return null
     }
-    
+
     return profile
-  } catch (error) {
-    console.error('Error in getUserProfile:', error)
+  } catch (error: any) {
+    logger.error('GET_PROFILE_FAILED', { context: 'getUserProfile', reason: error?.message })
     return null
   }
 }
