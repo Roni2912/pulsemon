@@ -22,6 +22,76 @@ export const supabaseAdmin = createClient(
   }
 )
 
+// Number of consecutive failures/successes required to flip incident state.
+// Matches the DB trigger `handle_incident_detection` in 00003_create_checks.sql,
+// and the default `failure_threshold` / `recovery_threshold` in alert_settings.
+// Keep these in sync — drift caused incidents to fire on the very first failure.
+const DEFAULT_FAILURE_THRESHOLD = 3
+const DEFAULT_RECOVERY_THRESHOLD = 3
+
+/**
+ * Count consecutive matching statuses from the most recent check downward.
+ * Returns how many of the last N checks share the same `success/!success` outcome.
+ */
+async function countConsecutiveStatus(
+  monitorId: string,
+  wantSuccess: boolean,
+  limit: number
+): Promise<number> {
+  const { data: rows, error } = await supabaseAdmin
+    .from('checks')
+    .select('status')
+    .eq('monitor_id', monitorId)
+    .order('checked_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    logger.error('CONSECUTIVE_STATUS_QUERY_FAILED', {
+      context: 'countConsecutiveStatus',
+      monitorId,
+      reason: error.message,
+    })
+    return 0
+  }
+
+  let count = 0
+  for (const row of rows || []) {
+    const isSuccess = row.status === 'success'
+    if (isSuccess === wantSuccess) count++
+    else break
+  }
+  return count
+}
+
+/**
+ * Resolve thresholds from alert_settings if the user has overrides; otherwise defaults.
+ * Returns the most-specific setting first (per-monitor before global).
+ */
+async function getThresholds(userId: string, monitorId: string) {
+  const { data: settings, error } = await supabaseAdmin
+    .from('alert_settings')
+    .select('failure_threshold,recovery_threshold,monitor_id')
+    .eq('user_id', userId)
+    .eq('is_enabled', true)
+    .or(`monitor_id.is.null,monitor_id.eq.${monitorId}`)
+    .order('monitor_id', { ascending: false, nullsFirst: false })
+    .limit(1)
+
+  if (error) {
+    logger.warn('THRESHOLDS_QUERY_FAILED', {
+      context: 'getThresholds',
+      monitorId,
+      reason: error.message,
+    })
+  }
+
+  const setting = settings?.[0]
+  return {
+    failureThreshold: setting?.failure_threshold ?? DEFAULT_FAILURE_THRESHOLD,
+    recoveryThreshold: setting?.recovery_threshold ?? DEFAULT_RECOVERY_THRESHOLD,
+  }
+}
+
 /**
  * Perform a website check and record the result
  * This function is called by the cron job to check monitor status
@@ -37,12 +107,20 @@ export async function performMonitorCheck(monitorId: string) {
       .single()
 
     if (monitorError || !monitor) {
-      logger.warn('MONITOR_NOT_FOUND', { context: 'performMonitorCheck', reason: monitorId })
+      logger.warn('MONITOR_NOT_FOUND', { context: 'performMonitorCheck', monitorId, reason: monitorError?.message })
       return { success: false, error: 'Monitor not found or inactive' }
     }
 
     // Perform the actual HTTP check
     const checkResult = await performHttpCheck(monitor)
+    logger.info('CHECK_PERFORMED', {
+      context: 'performMonitorCheck',
+      monitorId,
+      success: checkResult.success,
+      statusCode: checkResult.statusCode ?? undefined,
+      responseTimeMs: checkResult.responseTime ?? undefined,
+      errorType: checkResult.errorType ?? undefined,
+    })
 
     // Record the check result
     const { error: insertError } = await supabaseAdmin
@@ -64,78 +142,181 @@ export async function performMonitorCheck(monitorId: string) {
       })
 
     if (insertError) {
-      logger.error('CHECK_INSERT_FAILED', { context: 'performMonitorCheck', reason: insertError.message })
+      logger.error('CHECK_INSERT_FAILED', { context: 'performMonitorCheck', monitorId, reason: insertError.message })
       return { success: false, error: 'Failed to record check result' }
     }
 
     // Monitor stats (is_up, last_checked_at, total_checks, etc.) are updated
     // automatically by the DB trigger `checks_update_monitor_stats` on check insert.
 
-    const wasUp = monitor.is_up
+    // Re-read monitor to see post-trigger state (current_incident_id may have changed).
+    const { data: freshMonitor } = await supabaseAdmin
+      .from('monitors')
+      .select('id, name, url, user_id, current_incident_id, downtime_started_at, is_up')
+      .eq('id', monitorId)
+      .single()
+
+    const monitorState = freshMonitor ?? monitor
     const isNowUp = checkResult.success
+    const { failureThreshold, recoveryThreshold } = await getThresholds(monitor.user_id, monitorId)
 
-    // Handle incident creation/resolution
-    if (!isNowUp && wasUp !== false) {
-      // Monitor just went down — create incident
-      const { data: newIncident } = await supabaseAdmin
-        .from('incidents')
-        .insert({
-          monitor_id: monitorId,
-          title: `${monitor.name} is down`,
-          description: checkResult.error || 'Monitor check failed',
-          status: 'open',
-          severity: 'major',
-          started_at: new Date().toISOString(),
-          detected_at: new Date().toISOString(),
+    if (!isNowUp) {
+      // Failure path — only create an incident if we've crossed the failure threshold
+      // and there is no open incident already.
+      if (monitorState.current_incident_id) {
+        logger.info('INCIDENT_ALREADY_OPEN', {
+          context: 'performMonitorCheck',
+          monitorId,
+          incidentId: monitorState.current_incident_id,
         })
-        .select()
-        .single()
+      } else {
+        const consecutiveFailures = await countConsecutiveStatus(monitorId, false, failureThreshold)
 
-      // Send down alert email
-      if (newIncident) {
-        try {
-          const { sendDownAlert } = await import('@/lib/resend/alerts')
-          await sendDownAlert(monitor, newIncident)
-        } catch (error: any) {
-          logger.error('DOWN_ALERT_SEND_FAILED', { context: 'performMonitorCheck', reason: error?.message })
+        if (consecutiveFailures < failureThreshold) {
+          logger.info('FAILURE_BELOW_THRESHOLD', {
+            context: 'performMonitorCheck',
+            monitorId,
+            consecutiveFailures,
+            failureThreshold,
+          })
+        } else {
+          const { data: newIncident, error: incidentError } = await supabaseAdmin
+            .from('incidents')
+            .insert({
+              monitor_id: monitorId,
+              title: `${monitor.name} is down`,
+              description: checkResult.error || 'Monitor check failed',
+              status: 'open',
+              severity: 'major',
+              started_at: monitorState.downtime_started_at ?? new Date().toISOString(),
+              detected_at: new Date().toISOString(),
+            })
+            .select()
+            .single()
+
+          if (incidentError || !newIncident) {
+            logger.error('INCIDENT_CREATE_FAILED', {
+              context: 'performMonitorCheck',
+              monitorId,
+              reason: incidentError?.message,
+            })
+          } else {
+            logger.info('INCIDENT_OPENED', {
+              context: 'performMonitorCheck',
+              monitorId,
+              incidentId: newIncident.id,
+              consecutiveFailures,
+            })
+
+            try {
+              const { dispatchAlert } = await import('@/lib/notifications/dispatch')
+              await dispatchAlert({
+                monitor: { id: monitor.id, name: monitor.name, url: monitor.url, user_id: monitor.user_id },
+                incident: {
+                  id: newIncident.id,
+                  title: newIncident.title,
+                  description: newIncident.description ?? '',
+                  started_at: newIncident.started_at,
+                },
+                eventType: 'monitor_down',
+              })
+            } catch (error: any) {
+              logger.error('DOWN_ALERT_DISPATCH_FAILED', {
+                context: 'performMonitorCheck',
+                monitorId,
+                incidentId: newIncident.id,
+                reason: error?.message,
+              })
+            }
+          }
         }
       }
-    } else if (isNowUp && wasUp === false) {
-      // Monitor recovered — resolve open incidents
-      const { data: openIncidents } = await supabaseAdmin
-        .from('incidents')
-        .select('id, started_at')
-        .eq('monitor_id', monitorId)
-        .in('status', ['open', 'investigating', 'identified', 'monitoring'])
+    } else {
+      // Success path — only resolve open incidents after the recovery threshold is met.
+      if (!monitorState.current_incident_id) {
+        // Nothing to resolve.
+      } else {
+        const consecutiveSuccesses = await countConsecutiveStatus(monitorId, true, recoveryThreshold)
 
-      if (openIncidents && openIncidents.length > 0) {
-        const now = new Date()
-        for (const incident of openIncidents) {
-          const startedAt = new Date(incident.started_at)
-          const durationSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000)
-
-          await supabaseAdmin
+        if (consecutiveSuccesses < recoveryThreshold) {
+          logger.info('RECOVERY_BELOW_THRESHOLD', {
+            context: 'performMonitorCheck',
+            monitorId,
+            incidentId: monitorState.current_incident_id,
+            consecutiveSuccesses,
+            recoveryThreshold,
+          })
+        } else {
+          const { data: openIncidents, error: openError } = await supabaseAdmin
             .from('incidents')
-            .update({
-              status: 'resolved',
-              resolved_at: now.toISOString(),
-              duration_seconds: durationSeconds,
-              resolution_summary: 'Monitor recovered automatically',
-            })
-            .eq('id', incident.id)
+            .select('id, started_at')
+            .eq('monitor_id', monitorId)
+            .in('status', ['open', 'investigating', 'identified', 'monitoring'])
 
-          // Send recovery alert email
-          try {
-            const { sendRecoveryAlert } = await import('@/lib/resend/alerts')
-            await sendRecoveryAlert(monitor, {
-              id: incident.id,
-              title: `${monitor.name} recovered`,
-              description: 'Monitor recovered automatically',
-              started_at: incident.started_at,
-              duration_seconds: durationSeconds,
+          if (openError) {
+            logger.error('OPEN_INCIDENTS_QUERY_FAILED', {
+              context: 'performMonitorCheck',
+              monitorId,
+              reason: openError.message,
             })
-          } catch (error: any) {
-            logger.error('RECOVERY_ALERT_SEND_FAILED', { context: 'performMonitorCheck', reason: error?.message })
+          }
+
+          for (const incident of openIncidents ?? []) {
+            const now = new Date()
+            const startedAt = new Date(incident.started_at)
+            const durationSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000)
+
+            const { error: resolveError } = await supabaseAdmin
+              .from('incidents')
+              .update({
+                status: 'resolved',
+                resolved_at: now.toISOString(),
+                duration_seconds: durationSeconds,
+                resolution_summary: 'Monitor recovered automatically',
+              })
+              .eq('id', incident.id)
+
+            if (resolveError) {
+              logger.error('INCIDENT_RESOLVE_FAILED', {
+                context: 'performMonitorCheck',
+                monitorId,
+                incidentId: incident.id,
+                reason: resolveError.message,
+              })
+              continue
+            }
+
+            logger.info('INCIDENT_RESOLVED', {
+              context: 'performMonitorCheck',
+              monitorId,
+              incidentId: incident.id,
+              durationSeconds,
+              consecutiveSuccesses,
+            })
+
+            try {
+              const { dispatchAlert } = await import('@/lib/notifications/dispatch')
+              const { formatDuration } = await import('@/lib/notifications/format')
+              await dispatchAlert({
+                monitor: { id: monitor.id, name: monitor.name, url: monitor.url, user_id: monitor.user_id },
+                incident: {
+                  id: incident.id,
+                  title: `${monitor.name} recovered`,
+                  description: 'Monitor recovered automatically',
+                  started_at: incident.started_at,
+                  duration_seconds: durationSeconds,
+                },
+                eventType: 'monitor_up',
+                downtimeDuration: formatDuration(durationSeconds),
+              })
+            } catch (error: any) {
+              logger.error('RECOVERY_ALERT_DISPATCH_FAILED', {
+                context: 'performMonitorCheck',
+                monitorId,
+                incidentId: incident.id,
+                reason: error?.message,
+              })
+            }
           }
         }
       }
@@ -144,7 +325,7 @@ export async function performMonitorCheck(monitorId: string) {
     return { success: true, result: checkResult }
 
   } catch (error: any) {
-    logger.error('MONITOR_CHECK_FAILED', { context: 'performMonitorCheck', reason: error?.message })
+    logger.error('MONITOR_CHECK_FAILED', { context: 'performMonitorCheck', monitorId, reason: error?.message })
     return { success: false, error: 'Unexpected error during check' }
   }
 }

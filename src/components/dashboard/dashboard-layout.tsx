@@ -68,7 +68,7 @@ export function DashboardLayout({ children, email, name }: DashboardLayoutProps)
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6 animate-in">
+        <main className="p-4 lg:p-6 page-fade-in">
           {children}
         </main>
       </div>

@@ -155,8 +155,7 @@
     background: hsl(220 10% 96%);
   }
 
-  /* Smooth page transitions */
-  .animate-in {
+  .page-fade-in {
     animation: fadeIn 0.3s ease-out;
   }
 

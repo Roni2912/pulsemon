@@ -2,6 +2,44 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/logger';
 
+const SUPPORTED_CHANNELS = ['email', 'slack', 'webhook'] as const;
+const SUPPORTED_EVENTS = ['monitor_down', 'monitor_up', 'ssl_expiry', 'response_time', 'status_change'] as const;
+
+/**
+ * Reject settings that would silently fail at delivery time. Each channel has
+ * required fields in `channel_config`; catching them here means the user sees
+ * the error in the form, not three days later when the alert never arrives.
+ */
+function validateChannelConfig(channel: string, config: any): string | null {
+  if (channel === 'email') {
+    return null; // recipient defaults to profile.email
+  }
+  if (channel === 'slack') {
+    if (!config?.webhook_url || typeof config.webhook_url !== 'string') {
+      return 'Slack channel requires channel_config.webhook_url';
+    }
+    if (!config.webhook_url.startsWith('https://hooks.slack.com/')) {
+      return 'Slack webhook_url must be a hooks.slack.com URL';
+    }
+    return null;
+  }
+  if (channel === 'webhook') {
+    if (!config?.url || typeof config.url !== 'string') {
+      return 'Webhook channel requires channel_config.url';
+    }
+    try {
+      const parsed = new URL(config.url);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        return 'Webhook url must be http(s)';
+      }
+    } catch {
+      return 'Webhook url is not a valid URL';
+    }
+    return null;
+  }
+  return `Unsupported channel: ${channel}`;
+}
+
 // GET /api/settings/alerts - Get user's alert settings
 export async function GET() {
   try {
@@ -64,6 +102,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!SUPPORTED_CHANNELS.includes(channel)) {
+      return NextResponse.json(
+        { error: `Channel must be one of: ${SUPPORTED_CHANNELS.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    if (!Array.isArray(events) || events.length === 0 || events.some((e: string) => !SUPPORTED_EVENTS.includes(e as any))) {
+      return NextResponse.json(
+        { error: `events must be a non-empty array from: ${SUPPORTED_EVENTS.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    const configError = validateChannelConfig(channel, channel_config);
+    if (configError) {
+      logger.warn('ALERT_SETTING_CONFIG_INVALID', {
+        context: 'POST /api/settings/alerts',
+        userId: user.id,
+        channel,
+        reason: configError,
+      });
+      return NextResponse.json({ error: configError }, { status: 400 });
+    }
+
     // Create alert setting
     const { data: setting, error } = await supabase
       .from('alert_settings')
@@ -113,6 +176,39 @@ export async function PATCH(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: 'Missing alert setting ID' }, { status: 400 });
+    }
+
+    // If channel or channel_config is being changed, re-validate the pair so
+    // a partial PATCH cannot leave the row in an undeliverable state.
+    if (updates.channel || updates.channel_config) {
+      const { data: existing } = await supabase
+        .from('alert_settings')
+        .select('channel, channel_config')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+
+      const finalChannel = updates.channel ?? existing?.channel;
+      const finalConfig = updates.channel_config ?? existing?.channel_config;
+
+      if (finalChannel && !SUPPORTED_CHANNELS.includes(finalChannel)) {
+        return NextResponse.json(
+          { error: `Channel must be one of: ${SUPPORTED_CHANNELS.join(', ')}` },
+          { status: 400 }
+        );
+      }
+
+      const configError = validateChannelConfig(finalChannel, finalConfig);
+      if (configError) {
+        logger.warn('ALERT_SETTING_CONFIG_INVALID', {
+          context: 'PATCH /api/settings/alerts',
+          userId: user.id,
+          alertSettingId: id,
+          channel: finalChannel,
+          reason: configError,
+        });
+        return NextResponse.json({ error: configError }, { status: 400 });
+      }
     }
 
     // Update alert setting
