@@ -15,6 +15,8 @@ import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StatusPage } from "@/types";
 import { DeleteStatusPageButton } from "./delete-button";
 import { StatusPageForm } from "@/components/dashboard/status-page-form";
+import { SubscribersList } from "@/components/dashboard/subscribers-list";
+import { Users } from "lucide-react";
 
 function mapDbToStatusPage(row: any, monitorIds: string[]): StatusPage {
   return {
@@ -66,6 +68,14 @@ export default async function StatusPageDetailPage({
     .from("monitors")
     .select("id, name, is_up, status")
     .in("id", monitorIds.length > 0 ? monitorIds : ["none"]);
+
+  const { data: subscribersData } = await supabase
+    .from("status_page_subscribers")
+    .select("id, email, confirmed, unsubscribed, created_at, confirmed_at")
+    .eq("status_page_id", id)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const subscribers = (subscribersData ?? []) as any[];
 
   return (
     <div className="space-y-6">
@@ -192,6 +202,18 @@ export default async function StatusPageDetailPage({
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Subscribers ({subscribers.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SubscribersList pageId={id} subscribers={subscribers} />
+        </CardContent>
+      </Card>
 
       {/* Edit form */}
       <Card>
