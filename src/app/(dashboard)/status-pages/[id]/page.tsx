@@ -16,6 +16,8 @@ import type { StatusPage } from "@/types";
 import { DeleteStatusPageButton } from "./delete-button";
 import { StatusPageForm } from "@/components/dashboard/status-page-form";
 import { SubscribersList } from "@/components/dashboard/subscribers-list";
+import { MaintenanceCard } from "@/components/dashboard/maintenance-card";
+import { CustomDomainCard } from "@/components/dashboard/custom-domain-card";
 import { Users } from "lucide-react";
 
 function mapDbToStatusPage(row: any, monitorIds: string[]): StatusPage {
@@ -214,6 +216,29 @@ export default async function StatusPageDetailPage({
           <SubscribersList pageId={id} subscribers={subscribers} />
         </CardContent>
       </Card>
+
+      <MaintenanceCard
+        pageId={id}
+        initial={{
+          maintenance_mode: dbPage.maintenance_mode ?? false,
+          maintenance_message: dbPage.maintenance_message ?? null,
+          maintenance_scheduled_start: dbPage.maintenance_scheduled_start ?? null,
+          maintenance_scheduled_end: dbPage.maintenance_scheduled_end ?? null,
+        }}
+      />
+
+      <CustomDomainCard
+        pageId={id}
+        initial={{
+          custom_domain: dbPage.custom_domain ?? null,
+          custom_domain_verified: dbPage.custom_domain_verified ?? false,
+        }}
+        appHost={
+          process.env.NEXT_PUBLIC_APP_HOST ||
+          process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, '') ||
+          ''
+        }
+      />
 
       {/* Edit form */}
       <Card>

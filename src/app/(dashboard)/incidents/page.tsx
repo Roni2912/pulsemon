@@ -2,6 +2,7 @@ import { AlertCircle } from "lucide-react";
 import { getUser, createServerSupabaseClient } from "@/lib/supabase/server";
 import { IncidentTimeline } from "@/components/dashboard/incident-timeline";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ReportIncidentButton } from "@/components/dashboard/report-incident-button";
 
 async function getIncidents(userId: string) {
   const supabase = await createServerSupabaseClient();
@@ -47,6 +48,16 @@ export default async function IncidentsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Incidents</h2>
+          <p className="text-sm text-muted-foreground">
+            Auto-detected incidents and manually-reported issues across your monitors.
+          </p>
+        </div>
+        <ReportIncidentButton />
+      </div>
+
       {incidents.length === 0 ? (
         <div className="flex items-center justify-center min-h-[60vh]">
           <EmptyState
