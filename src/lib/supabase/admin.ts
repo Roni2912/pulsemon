@@ -9,6 +9,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { logger } from '@/lib/logger'
+import { performCheck } from '@/lib/checks'
 
 // Admin client with service role key (bypasses RLS)
 export const supabaseAdmin = createClient(
@@ -111,11 +112,12 @@ export async function performMonitorCheck(monitorId: string) {
       return { success: false, error: 'Monitor not found or inactive' }
     }
 
-    // Perform the actual HTTP check
-    const checkResult = await performHttpCheck(monitor)
+    // Perform the check (dispatched by monitor.type: http/https/tcp/ping)
+    const checkResult = await performCheck(monitor)
     logger.info('CHECK_PERFORMED', {
       context: 'performMonitorCheck',
       monitorId,
+      type: monitor.type,
       success: checkResult.success,
       statusCode: checkResult.statusCode ?? undefined,
       responseTimeMs: checkResult.responseTime ?? undefined,
@@ -366,107 +368,6 @@ export async function performMonitorCheck(monitorId: string) {
   } catch (error: any) {
     logger.error('MONITOR_CHECK_FAILED', { context: 'performMonitorCheck', monitorId, reason: error?.message })
     return { success: false, error: 'Unexpected error during check' }
-  }
-}
-
-/**
- * Perform HTTP check on a monitor
- * Returns detailed check results including timing and SSL information
- */
-async function performHttpCheck(monitor: any) {
-  const startTime = Date.now()
-  let dnsTime = 0
-  let connectTime = 0
-  let tlsTime = 0
-
-  try {
-    // Create AbortController for timeout
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), monitor.timeout_seconds * 1000)
-
-    // Perform the HTTP request
-    const response = await fetch(monitor.url, {
-      method: monitor.method || 'GET',
-      headers: {
-        'User-Agent': 'UptimeMonitor/1.0',
-        ...monitor.headers
-      },
-      body: monitor.method !== 'GET' ? monitor.body : undefined,
-      signal: controller.signal
-    })
-
-    clearTimeout(timeoutId)
-    const endTime = Date.now()
-    const responseTime = endTime - startTime
-
-    // Check if status code is expected
-    const expectedCodes = monitor.expected_status_codes || [200]
-    const statusCodeValid = expectedCodes.includes(response.status)
-
-    // Check response content if specified
-    let contentMatched = null
-    if (monitor.expected_content) {
-      const responseText = await response.text()
-      contentMatched = responseText.includes(monitor.expected_content)
-    }
-
-    // Check SSL certificate (for HTTPS)
-    let sslValid = null
-    let sslExpiresAt = null
-    if (monitor.url.startsWith('https://') && monitor.check_ssl) {
-      // Note: In a real implementation, you'd need to use a library like 'tls' 
-      // to get SSL certificate information. For now, we'll assume SSL is valid
-      // if the HTTPS request succeeded.
-      sslValid = response.ok
-    }
-
-    return {
-      success: statusCodeValid && (contentMatched === null || contentMatched),
-      responseTime,
-      statusCode: response.status,
-      error: statusCodeValid ? null : `Unexpected status code: ${response.status}`,
-      errorType: statusCodeValid ? null : 'http',
-      sslValid,
-      sslExpiresAt,
-      contentMatched,
-      ipAddress: null, // Would need additional DNS lookup
-      dnsTime,
-      connectTime,
-      tlsTime
-    }
-
-  } catch (error: any) {
-    const endTime = Date.now()
-    const responseTime = endTime - startTime
-
-    let errorType = 'unknown'
-    let errorMessage = error.message
-
-    if (error.name === 'AbortError') {
-      errorType = 'timeout'
-      errorMessage = `Request timed out after ${monitor.timeout_seconds} seconds`
-    } else if (error.code === 'ENOTFOUND') {
-      errorType = 'dns_error'
-      errorMessage = 'DNS resolution failed'
-    } else if (error.code === 'ECONNREFUSED') {
-      errorType = 'connection_error'
-      errorMessage = 'Connection refused'
-    }
-
-    return {
-      success: false,
-      responseTime,
-      statusCode: null,
-      error: errorMessage,
-      errorType,
-      sslValid: null,
-      sslExpiresAt: null,
-      contentMatched: null,
-      ipAddress: null,
-      dnsTime,
-      connectTime,
-      tlsTime
-    }
   }
 }
 

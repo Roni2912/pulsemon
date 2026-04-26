@@ -120,15 +120,36 @@ export function MonitorForm({ mode, defaultValues, monitorId }: MonitorFormProps
         <FormField
           control={form.control}
           name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL</FormLabel>
-              <FormControl>
-                <Input placeholder="https://example.com" disabled={isLoading} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            const type = form.watch("type");
+            const isHttp = type === "http" || type === "https";
+            return (
+              <FormItem>
+                <FormLabel>{isHttp ? "URL" : "Target"}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={
+                      isHttp
+                        ? "https://example.com"
+                        : type === "tcp"
+                          ? "db.example.com:5432"
+                          : "example.com"
+                    }
+                    disabled={isLoading}
+                    {...field}
+                  />
+                </FormControl>
+                {!isHttp && (
+                  <p className="text-xs text-muted-foreground">
+                    {type === "tcp"
+                      ? "Host and port to probe (TCP connect)."
+                      : "Host to probe. Reachability is verified via TCP on port 80."}
+                  </p>
+                )}
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
 
         <div className="grid gap-4 sm:grid-cols-2">

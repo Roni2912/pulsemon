@@ -1,15 +1,14 @@
 import { z } from "zod";
 import { HTTP_METHODS, MONITOR_TYPES } from "@/lib/constants";
 
-export const monitorSchema = z.object({
+const HOST_PORT_RE = /^(?:[a-zA-Z]+:\/\/)?([a-zA-Z0-9.-]+|\[[0-9a-fA-F:]+\])(?::([0-9]{1,5}))?$/;
+
+const monitorBaseSchema = z.object({
   name: z
     .string()
     .min(1, "Name is required")
     .max(100, "Name must be less than 100 characters"),
-  url: z
-    .string()
-    .min(1, "URL is required")
-    .url("Please enter a valid URL"),
+  url: z.string().min(1, "URL is required"),
   type: z.enum(MONITOR_TYPES).default("https"),
   method: z.enum(HTTP_METHODS).default("GET"),
   interval: z
@@ -31,6 +30,63 @@ export const monitorSchema = z.object({
   headers: z.record(z.string()).optional().nullable(),
   body: z.string().optional().nullable(),
 });
+
+function refineMonitorTarget(
+  data: { type?: string; url?: string },
+  ctx: z.RefinementCtx
+) {
+  if (data.url === undefined || data.type === undefined) return;
+  const target = data.url.trim();
+  if (data.type === "http" || data.type === "https") {
+    try {
+      const u = new URL(target);
+      if (u.protocol !== "http:" && u.protocol !== "https:") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["url"],
+          message: "URL must start with http:// or https://",
+        });
+      }
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["url"],
+        message: "Please enter a valid URL",
+      });
+    }
+    return;
+  }
+  const match = target.match(HOST_PORT_RE);
+  if (!match) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["url"],
+      message: `Enter a host or host:port (e.g. db.example.com:5432)`,
+    });
+    return;
+  }
+  if (match[2]) {
+    const port = Number(match[2]);
+    if (port < 1 || port > 65535) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["url"],
+        message: "Port must be between 1 and 65535",
+      });
+    }
+  } else if (data.type === "tcp") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["url"],
+      message: "TCP monitors require a port (e.g. host:5432)",
+    });
+  }
+}
+
+export const monitorSchema = monitorBaseSchema.superRefine(refineMonitorTarget);
+export const monitorPartialSchema = monitorBaseSchema
+  .partial()
+  .superRefine(refineMonitorTarget);
 
 export const statusPageSchema = z.object({
   name: z

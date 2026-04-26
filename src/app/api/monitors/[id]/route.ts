@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, getUser } from "@/lib/supabase/server";
-import { monitorSchema } from "@/lib/utils/validation";
+import { monitorPartialSchema } from "@/lib/utils/validation";
 import type { Monitor, Check } from "@/types";
 
 function mapDbToMonitor(row: any): Monitor {
@@ -100,7 +100,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = monitorSchema.partial().safeParse(body);
+  const parsed = monitorPartialSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.errors[0].message },
