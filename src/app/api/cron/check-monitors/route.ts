@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { getMonitorsToCheck, performMonitorCheck } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
-// POST /api/cron/check-monitors - Run monitor checks (called by cron)
-// Authorization is handled by middleware (validates CRON_SECRET)
-export async function POST() {
+// /api/cron/check-monitors — Run monitor checks.
+// Authorization is handled by middleware (CRON_SECRET).
+// Vercel cron sends GET; POST is kept so curl -X POST still works for manual tests.
+async function run() {
   const startTime = Date.now();
 
   try {
@@ -18,7 +19,6 @@ export async function POST() {
       });
     }
 
-    // Check all monitors concurrently
     const results = await Promise.allSettled(
       monitors.map((monitor: any) => performMonitorCheck(monitor.id))
     );
@@ -37,9 +37,9 @@ export async function POST() {
     });
   } catch (error: any) {
     logger.error("CRON_CHECK_MONITORS_FAILED", { context: "cron/check-monitors", reason: error?.message });
-    return NextResponse.json(
-      { error: "Failed to run monitor checks" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to run monitor checks" }, { status: 500 });
   }
 }
+
+export const GET = run;
+export const POST = run;

@@ -4,11 +4,11 @@ import { logger } from '@/lib/logger';
 import { probeSslCertificate } from '@/lib/checks/ssl';
 import { resend, EMAIL_FROM, APP_URL } from '@/lib/resend/client';
 
-// POST /api/cron/check-ssl
-// Auth: CRON_SECRET via middleware. Suggested schedule: daily.
+// /api/cron/check-ssl
+// Auth: CRON_SECRET via middleware. Schedule: daily.
 // Probes the TLS certificate for every active https monitor with check_ssl=true,
 // updates monitors.ssl_*, and emails the owner if expiry is within their warning window.
-export async function POST() {
+async function run() {
   const startedAt = Date.now();
 
   const { data: monitors, error } = await supabaseAdmin
@@ -90,6 +90,9 @@ export async function POST() {
 
   return NextResponse.json({ probed, warned, duration_ms: durationMs });
 }
+
+export const GET = run;
+export const POST = run;
 
 async function sendExpiryEmail(
   monitor: { id: string; user_id: string; name: string; url: string },
