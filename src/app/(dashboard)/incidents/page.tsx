@@ -19,7 +19,9 @@ async function getIncidents(userId: string) {
 
   const { data: incidents, error } = await supabase
     .from("incidents")
-    .select("*")
+    .select(
+      "id, monitor_id, title, description, status, severity, started_at, resolved_at, duration_seconds, acknowledged_at, public_message, public_visible"
+    )
     .in("monitor_id", monitorIds)
     .order("started_at", { ascending: false })
     .limit(50);

@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, XCircle, MinusCircle, Activity } from "lucide-react";
+import { SubscribeForm } from "@/components/status/subscribe-form";
 
 async function getStatusPage(slug: string) {
   // Use admin client to bypass RLS for public access
@@ -71,10 +72,13 @@ function getUptimeColor(uptime: number): string {
 
 export default async function PublicStatusPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ subscribed?: string; unsubscribed?: string }>;
 }) {
   const { slug } = await params;
+  const sp = await searchParams;
   const result = await getStatusPage(slug);
 
   if (!result) {
@@ -162,6 +166,22 @@ export default async function PublicStatusPage({
             </Card>
           ))}
         </div>
+
+        {(sp.subscribed === 'ok' || sp.subscribed === 'already' ||
+          sp.unsubscribed === 'ok' || sp.unsubscribed === 'already') && (
+          <div className="mt-8 rounded-md border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950 p-4 text-sm text-green-800 dark:text-green-200">
+            {sp.subscribed === 'ok' && 'Subscription confirmed. You will be notified about incidents.'}
+            {sp.subscribed === 'already' && 'You are already subscribed.'}
+            {sp.unsubscribed === 'ok' && 'You have been unsubscribed.'}
+            {sp.unsubscribed === 'already' && 'You were already unsubscribed.'}
+          </div>
+        )}
+
+        {page.allow_subscriptions && (
+          <div className="mt-10 rounded-lg border bg-card p-6">
+            <SubscribeForm slug={slug} />
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-12 text-center text-sm text-muted-foreground">

@@ -2,6 +2,7 @@ import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { IncidentActions } from "./incident-actions";
 
 interface Incident {
   id: string;
@@ -14,6 +15,9 @@ interface Incident {
   started_at: string;
   resolved_at: string | null;
   duration_seconds: number | null;
+  acknowledged_at?: string | null;
+  public_message?: string | null;
+  public_visible?: boolean;
 }
 
 interface IncidentTimelineProps {
@@ -41,6 +45,10 @@ function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const mins = Math.round((seconds % 3600) / 60);
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -79,26 +87,47 @@ export function IncidentTimeline({ incidents }: IncidentTimelineProps) {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm truncate">
-                      {incident.title}
-                    </span>
-                    <Badge className={severity.className}>
-                      {severity.label}
-                    </Badge>
-                    <Badge
-                      className={cn(
-                        isResolved
-                          ? "text-green-600 bg-green-50 dark:bg-green-950 dark:text-green-400"
-                          : "text-red-600 bg-red-50 dark:bg-red-950 dark:text-red-400"
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <span className="font-semibold text-sm truncate">
+                        {incident.title}
+                      </span>
+                      <Badge className={severity.className}>
+                        {severity.label}
+                      </Badge>
+                      <Badge
+                        className={cn(
+                          isResolved
+                            ? "text-green-600 bg-green-50 dark:bg-green-950 dark:text-green-400"
+                            : "text-red-600 bg-red-50 dark:bg-red-950 dark:text-red-400"
+                        )}
+                      >
+                        {isResolved ? "Resolved" : capitalize(incident.status)}
+                      </Badge>
+                      {incident.acknowledged_at && !isResolved && (
+                        <Badge variant="outline" className="text-xs">
+                          Acknowledged
+                        </Badge>
                       )}
-                    >
-                      {isResolved ? "Resolved" : "Ongoing"}
-                    </Badge>
+                    </div>
+                    <IncidentActions
+                      incident={{
+                        id: incident.id,
+                        status: incident.status as any,
+                        acknowledged_at: incident.acknowledged_at ?? null,
+                        public_message: incident.public_message ?? null,
+                        public_visible: incident.public_visible ?? true,
+                      }}
+                    />
                   </div>
                   {incident.monitor_name && (
                     <p className="text-xs text-muted-foreground mt-1">
                       {incident.monitor_name}
+                    </p>
+                  )}
+                  {incident.public_message && (
+                    <p className="text-xs mt-2 p-2 rounded bg-muted text-foreground/80 italic">
+                      {incident.public_message}
                     </p>
                   )}
                   <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">

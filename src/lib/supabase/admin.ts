@@ -228,6 +228,25 @@ export async function performMonitorCheck(monitorId: string) {
                 reason: error?.message,
               })
             }
+
+            try {
+              const { notifySubscribers } = await import('@/lib/notifications/subscribers')
+              await notifySubscribers({
+                monitorId: monitor.id,
+                monitorName: monitor.name,
+                incidentId: newIncident.id,
+                incidentTitle: newIncident.title,
+                publicMessage: newIncident.public_message,
+                eventType: 'monitor_down',
+              })
+            } catch (error: any) {
+              logger.error('DOWN_SUBSCRIBER_NOTIFY_FAILED', {
+                context: 'performMonitorCheck',
+                monitorId,
+                incidentId: newIncident.id,
+                reason: error?.message,
+              })
+            }
           }
         }
       }
@@ -311,6 +330,26 @@ export async function performMonitorCheck(monitorId: string) {
               })
             } catch (error: any) {
               logger.error('RECOVERY_ALERT_DISPATCH_FAILED', {
+                context: 'performMonitorCheck',
+                monitorId,
+                incidentId: incident.id,
+                reason: error?.message,
+              })
+            }
+
+            try {
+              const { notifySubscribers } = await import('@/lib/notifications/subscribers')
+              const { formatDuration } = await import('@/lib/notifications/format')
+              await notifySubscribers({
+                monitorId: monitor.id,
+                monitorName: monitor.name,
+                incidentId: incident.id,
+                incidentTitle: `${monitor.name} recovered`,
+                eventType: 'monitor_up',
+                durationDescription: formatDuration(durationSeconds),
+              })
+            } catch (error: any) {
+              logger.error('RECOVERY_SUBSCRIBER_NOTIFY_FAILED', {
                 context: 'performMonitorCheck',
                 monitorId,
                 incidentId: incident.id,
