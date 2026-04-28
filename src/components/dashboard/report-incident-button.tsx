@@ -136,7 +136,7 @@ export function ReportIncidentButton() {
             <DialogTitle>Report incident</DialogTitle>
             <DialogDescription>
               Manually create an incident — useful for planned outages or issues
-              the auto-detector hasn't seen yet.
+              the auto-detector hasn&apos;t seen yet.
             </DialogDescription>
           </DialogHeader>
 

@@ -73,7 +73,7 @@ export function SubscribeForm({ slug }: Props) {
         </p>
       )}
       <p className="text-xs text-muted-foreground">
-        We'll email you when monitors go down or recover. Unsubscribe anytime.
+        We&apos;ll email you when monitors go down or recover. Unsubscribe anytime.
       </p>
     </form>
   );
