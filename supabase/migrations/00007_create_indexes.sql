@@ -234,9 +234,12 @@ LEFT JOIN incidents i ON m.id = i.monitor_id
 WHERE m.status = 'active'
 GROUP BY m.id, m.user_id, m.name, m.url, m.is_up, m.last_checked_at, m.last_response_time_ms;
 
--- Index for materialized view
+-- Index for materialized view. monitor_id MUST be a unique index because
+-- refresh_monitor_stats() uses REFRESH MATERIALIZED VIEW CONCURRENTLY,
+-- which Postgres only allows when the view has at least one unique index.
 CREATE INDEX IF NOT EXISTS monitor_stats_hourly_user_idx ON monitor_stats_hourly(user_id);
-CREATE INDEX IF NOT EXISTS monitor_stats_hourly_monitor_idx ON monitor_stats_hourly(monitor_id);
+CREATE UNIQUE INDEX IF NOT EXISTS monitor_stats_hourly_monitor_unique_idx
+    ON monitor_stats_hourly(monitor_id);
 
 -- ============================================================================
 -- DATABASE OPTIMIZATIONS
